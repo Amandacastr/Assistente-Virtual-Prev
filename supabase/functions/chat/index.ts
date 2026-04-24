@@ -508,8 +508,8 @@ Deno.serve(async (req) => {
         { role: "system", content: montarPrompt(plano) },
         ...ultimas,
       ],
-      max_tokens: 600,
-      temperature: 0.3,
+      max_tokens: 280,
+      temperature: 0.2,
     };
 
     const groqRes = await fetch(GROQ_URL, {
