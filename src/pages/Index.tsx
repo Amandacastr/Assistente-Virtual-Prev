@@ -44,7 +44,6 @@ const Index = () => {
         </h1>
         <p className="mt-3 text-center text-white/55 max-w-md text-[15px] font-light leading-relaxed">
           Tire suas dúvidas sobre os planos de previdência do Agros.
-          Escolha abaixo o plano sobre o qual deseja conversar.
         </p>
 
         <p className="mt-8 mb-4 text-[12px] uppercase tracking-widest text-white/40">
