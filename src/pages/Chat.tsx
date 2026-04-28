@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { Link, useParams, Navigate } from "react-router-dom";
 import { ArrowLeft, Send, RefreshCcw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { PrevMascot } from "@/components/PrevMascot";
+import { AgrosLogo } from "@/components/AgrosLogo";
 import { toast } from "sonner";
 
 type Plan = "invest" | "vida";
@@ -18,7 +19,7 @@ const PLAN_META: Record<Plan, { name: string; intro: string; suggestions: string
   invest: {
     name: "InvestPrev",
     intro:
-      "Olá! Sou o Prev, assistente do Agros para o **InvestPrev**. Como posso te ajudar hoje?",
+      "Olá! Sou a Prev, assistente do Agros para o **InvestPrev**. Como posso te ajudar hoje?",
     suggestions: [
       "Qual o valor mínimo de contribuição?",
       "Quais as vantagens do InvestPrev?",
@@ -29,7 +30,7 @@ const PLAN_META: Record<Plan, { name: string; intro: string; suggestions: string
   vida: {
     name: "VidaPrev",
     intro:
-      "Olá! Sou o Prev, assistente do Agros para o **VidaPrev**. Como posso te ajudar hoje?",
+      "Olá! Sou a Prev, assistente do Agros para o **VidaPrev**. Como posso te ajudar hoje?",
     suggestions: [
       "O que é o VidaPrev?",
       "Como é calculado o benefício de renda mensal?",
@@ -67,13 +68,23 @@ const Chat = () => {
   const [loading, setLoading] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Auto-scroll ao receber nova mensagem
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(messages));
     requestAnimationFrame(() => {
       scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
     });
   }, [messages, storageKey]);
+
+  // Auto-resize do textarea
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    const el = e.target;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 130) + "px";
+  };
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim().slice(0, 500);
@@ -82,6 +93,10 @@ const Chat = () => {
     const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: trimmed };
     setMessages((m) => [...m, userMsg]);
     setInput("");
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
     setLoading(true);
 
     try {
@@ -115,13 +130,16 @@ const Chat = () => {
 
   const handleClear = () => {
     setMessages([{ id: "intro", role: "assistant", content: meta.intro }]);
+    localStorage.removeItem(storageKey);
   };
 
-  const accent = plan === "invest" ? "primary" : "accent";
+  // Cor de acento por plano — classe fixa para o Tailwind não purgar
+  const accentBar = plan === "invest" ? "bg-primary/40" : "bg-accent/40";
 
   return (
     <div className="flex flex-col h-[100dvh] bg-[hsl(var(--chat-bg))] text-[hsl(var(--chat-text))]">
-      {/* Top bar */}
+
+      {/* ── Barra superior ── */}
       <header className="flex items-center gap-3 px-3.5 py-2.5 bg-primary text-primary-foreground shadow-[0_2px_14px_hsl(213_80%_15%/0.3)] flex-shrink-0">
         <Link
           to="/"
@@ -130,16 +148,23 @@ const Chat = () => {
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 border border-accent/40 overflow-hidden">
-          <PrevMascot size={28} />
+
+        {/* Avatar — persona Prev */}
+        <div className="flex h-9 w-9 items-center justify-center rounded-full overflow-hidden border border-accent/40 flex-shrink-0">
+          <PrevMascot size={36} />
         </div>
+
         <div className="flex-1 min-w-0">
           <p className="text-[13.5px] font-semibold leading-tight">Prev — {meta.name}</p>
           <p className="flex items-center gap-1.5 text-[11px] text-white/60">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
-            Online · Assistente Agros
+            Online · Agros
           </p>
         </div>
+
+        {/* Logo no lugar do nome escrito */}
+        <AgrosLogo height={22} className="brightness-0 invert opacity-70 hidden sm:block mr-1" />
+
         <button
           onClick={handleClear}
           className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-medium text-white/85 hover:bg-white/20 transition"
@@ -149,20 +174,23 @@ const Chat = () => {
         </button>
       </header>
 
-      {/* Chat area */}
+      {/* ── Área de chat ── */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 sm:px-6 py-5">
         <div className="mx-auto flex max-w-2xl flex-col gap-3.5">
           {messages.map((m) => (
-            <Bubble key={m.id} role={m.role} accent={accent}>
+            <Bubble key={m.id} role={m.role} accentBar={accentBar}>
               {m.content}
             </Bubble>
           ))}
+
+          {/* Typing indicator */}
           {loading && (
-            <div className="flex items-center gap-2 self-start rounded-2xl rounded-bl-sm bg-[hsl(var(--chat-bubble-bot))] border border-[hsl(var(--chat-border))] px-4 py-3 text-sm text-muted-foreground shadow-sm">
+            <div className="flex items-center gap-2 self-start rounded-2xl rounded-bl-sm bg-[hsl(var(--chat-bubble-bot))] border border-[hsl(var(--chat-border))] px-4 py-3 shadow-sm">
               <Dot delay={0} /> <Dot delay={150} /> <Dot delay={300} />
             </div>
           )}
 
+          {/* Chips de sugestão — apenas na mensagem inicial */}
           {messages.length <= 1 && !loading && (
             <div className="mt-2 flex flex-wrap gap-2">
               {meta.suggestions.map((s) => (
@@ -179,7 +207,7 @@ const Chat = () => {
         </div>
       </div>
 
-      {/* Input */}
+      {/* ── Input ── */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -190,8 +218,9 @@ const Chat = () => {
         <div className="mx-auto flex max-w-2xl items-end gap-2">
           <div className="flex-1 rounded-2xl border border-[hsl(var(--chat-border))] bg-[hsl(var(--chat-bg))] focus-within:border-primary/50 transition">
             <textarea
+              ref={textareaRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleInput}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -201,35 +230,39 @@ const Chat = () => {
               maxLength={500}
               rows={1}
               placeholder={`Pergunte sobre o ${meta.name}...`}
-              className="w-full resize-none bg-transparent px-4 py-3 text-[14px] outline-none placeholder:text-muted-foreground"
-              style={{ maxHeight: 140 }}
+              className="w-full resize-none bg-transparent px-4 py-3 text-[14px] outline-none placeholder:text-muted-foreground leading-relaxed"
+              style={{ maxHeight: 130 }}
             />
           </div>
           <button
             type="submit"
             disabled={loading || !input.trim()}
             aria-label="Enviar"
-            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition hover:bg-primary-glow disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition hover:bg-primary-glow disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Send className="h-4 w-4" />
           </button>
         </div>
         <p className="mx-auto mt-1.5 max-w-2xl text-[10.5px] text-muted-foreground">
-          Respostas geradas por IA. Em caso de dúvida sobre regras específicas, ligue (31) 3899-6550.
+          Respostas geradas por IA. Em caso de dúvida, ligue{" "}
+          <a href="tel:3138996550" className="underline underline-offset-2 hover:text-primary transition">
+            (31) 3899-6550
+          </a>.
         </p>
       </form>
     </div>
   );
 };
 
+/* ── Bubble ── */
 const Bubble = ({
   role,
   children,
-  accent,
+  accentBar,
 }: {
   role: "user" | "assistant";
   children: string;
-  accent: "primary" | "accent";
+  accentBar: string;
 }) => {
   if (role === "user") {
     return (
@@ -243,14 +276,16 @@ const Bubble = ({
       <div className="prose prose-sm max-w-none prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0 prose-strong:text-[hsl(var(--chat-text))]">
         <ReactMarkdown>{children}</ReactMarkdown>
       </div>
-      <span className={`mt-1 inline-block h-0.5 w-8 rounded-full bg-${accent}/40`} />
+      {/* Linha de acento por plano — classe fixa evita purge do Tailwind */}
+      <span className={`mt-1.5 inline-block h-0.5 w-8 rounded-full ${accentBar}`} />
     </div>
   );
 };
 
+/* ── Typing dot ── */
 const Dot = ({ delay }: { delay: number }) => (
   <span
-    className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground"
+    className="inline-block h-2 w-2 rounded-full bg-muted-foreground/50"
     style={{ animation: `pulse-dot 1.2s ${delay}ms infinite` }}
   />
 );
