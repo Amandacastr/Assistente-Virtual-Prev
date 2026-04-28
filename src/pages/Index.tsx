@@ -164,7 +164,7 @@ const PlanCard = ({ to, tag, tagTone, icon, title, desc, cta, ctaTone, showArrow
       : "bg-accent/15 border-accent/30";
   const btnCls =
     ctaTone === "blue"
-      ? "bg-sky-400 text-[hsl(213_80%_12%)] border-2 border-sky-300"
+      ? "bg-sky-700 text-white border-2 border-sky-700"
       : "bg-accent/90 text-[hsl(30_40%_8%)] border border-accent";
 
   return (
