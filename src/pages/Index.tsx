@@ -67,7 +67,6 @@ const Index = () => {
             desc="Plano de Contribuição Definida. Você escolhe quanto investir — a partir de R$ 100/mês — e constrói sua reserva no próprio ritmo."
             cta="Conversar sobre InvestPrev"
             ctaTone="blue"
-            showArrowPulse
           />
           {/* VidaPrev — tag exclusivo, ícone escudo */}
           <PlanCard
@@ -165,7 +164,7 @@ const PlanCard = ({ to, tag, tagTone, icon, title, desc, cta, ctaTone, showArrow
       : "bg-accent/15 border-accent/30";
   const btnCls =
     ctaTone === "blue"
-      ? "bg-primary-glow text-white border border-sky-300/60"
+      ? "bg-primary-glow text-[hsl(213_80%_12%)] border-2 border-sky-300"
       : "bg-accent/90 text-[hsl(30_40%_8%)] border border-accent";
 
   return (
