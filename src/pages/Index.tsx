@@ -170,31 +170,33 @@ const PlanCard = ({ to, tag, tagTone, icon, title, desc, cta, ctaTone, showArrow
   return (
     <Link
       to={to}
-      className="group relative overflow-hidden rounded-3xl glass p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-card)] hover:border-white/20"
+      className="group relative block transition-all duration-300 hover:-translate-y-1.5"
     >
-      <span
-        className={`absolute top-4 right-4 rounded-full border px-2.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider ${tagCls}`}
-      >
-        {tag}
-      </span>
-      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${iconWrapCls} mb-4`}>
-        {icon}
-      </div>
-      <h2 className="font-display text-3xl font-semibold text-white mb-2">{title}</h2>
-      <p className="text-[13.5px] font-light text-white/55 leading-relaxed mb-6">{desc}</p>
+      <div className="overflow-hidden rounded-3xl glass p-7 transition-all duration-300 group-hover:shadow-[var(--shadow-card)] group-hover:border-white/20">
+        <span
+          className={`absolute top-4 right-4 rounded-full border px-2.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider ${tagCls}`}
+        >
+          {tag}
+        </span>
+        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${iconWrapCls} mb-4`}>
+          {icon}
+        </div>
+        <h2 className="font-display text-3xl font-semibold text-white mb-2">{title}</h2>
+        <p className="text-[13.5px] font-light text-white/55 leading-relaxed mb-6">{desc}</p>
 
-      {/* Botão com indicador de ação — pulse no InvestPrev */}
-      <span
-        className={`relative inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13.5px] font-semibold transition-all group-hover:gap-3 ${btnCls}`}
-      >
-        {showArrowPulse && (
-          <span className="absolute -top-1 -right-1 flex h-3 w-3">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-60 animate-ping" />
-            <span className="relative inline-flex h-3 w-3 rounded-full bg-white opacity-80" />
-          </span>
-        )}
-        {cta} <ArrowRight className="h-4 w-4" />
-      </span>
+        {/* Botão com indicador de ação */}
+        <span
+          className={`relative inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13.5px] font-semibold transition-all group-hover:gap-3 ${btnCls}`}
+        >
+          {showArrowPulse && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-60 animate-ping" />
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-white opacity-80" />
+            </span>
+          )}
+          {cta} <ArrowRight className="h-4 w-4" />
+        </span>
+      </div>
     </Link>
   );
 };
