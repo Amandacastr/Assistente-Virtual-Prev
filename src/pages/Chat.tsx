@@ -7,7 +7,7 @@ import { PrevMascot } from "@/components/PrevMascot";
 import { AgrosLogo } from "@/components/AgrosLogo";
 import { toast } from "sonner";
 
-type Plan = "invest" | "vida";
+type Plan = "invest" | "vida" | "outros";
 
 interface Message {
   id: string;
@@ -36,6 +36,17 @@ const PLAN_META: Record<Plan, { name: string; intro: string; suggestions: string
       "Como é calculado o benefício de renda mensal?",
       "Posso fazer resgate parcial?",
       "O que acontece com o saldo após o falecimento?",
+    ],
+  },
+  outros: {
+    name: "Outros Assuntos",
+    intro:
+      "Olá! Sou a Prev, assistente do Agros. Aqui posso te ajudar com **plano de saúde, boletos, mensalidades, notícias e demandas administrativas**. Como posso ajudar?",
+    suggestions: [
+      "Como faço para emitir um boleto?",
+      "Qual o prazo de pagamento da mensalidade?",
+      "Como acesso o plano de saúde?",
+      "Quais as últimas notícias do Agros?",
     ],
   },
 };
