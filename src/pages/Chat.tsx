@@ -62,7 +62,7 @@ const getUserId = () => {
 
 const Chat = () => {
   const { plan } = useParams<{ plan: string }>();
-  if (plan !== "invest" && plan !== "vida") return <Navigate to="/" replace />;
+  if (plan !== "invest" && plan !== "vida" && plan !== "outros") return <Navigate to="/" replace />;
 
   const meta = PLAN_META[plan];
   const userId = useMemo(() => getUserId(), []);
