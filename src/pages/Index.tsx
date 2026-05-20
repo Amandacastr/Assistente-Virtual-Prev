@@ -73,23 +73,25 @@ const Index = () => {
             to="/chat/vida"
             tag="Plano exclusivo"
             tagTone="gold"
-            icon={<Shield className="h-6 w-6 text-accent" />}
+            icon={<Shield className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />}
             title="VidaPrev"
             desc="Plano exclusivo para participantes transferidos pelo Termo de Conciliação de 2021. Tire dúvidas sobre benefício, resgate e IR."
             cta="Conversar sobre VidaPrev"
             ctaTone="gold"
           />
           {/* Outros Assuntos — saúde, boletos, notícias e admin */}
-          <PlanCard
-            to="/chat/outros"
-            tag="Demais demandas"
-            tagTone="blue"
-            icon={<MessagesSquare className="h-6 w-6 text-primary-glow" />}
-            title="Outros Assuntos"
-            desc="Tire suas dúvidas sobre plano de saúde, emissão de boletos, mensalidades, notícias e demandas administrativas gerais do Agros."
-            cta="Conversar sobre Outros Assuntos"
-            ctaTone="blue"
-          />
+          <div className="sm:col-span-2 lg:col-span-1 sm:max-w-md sm:mx-auto sm:w-full lg:max-w-none">
+            <PlanCard
+              to="/chat/outros"
+              tag="Demais demandas"
+              tagTone="green"
+              icon={<MessagesSquare className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-300" />}
+              title="Outros Assuntos"
+              desc="Tire suas dúvidas sobre plano de saúde, emissão de boletos, mensalidades, notícias e demandas administrativas gerais do Agros."
+              cta="Conversar sobre Outros Assuntos"
+              ctaTone="green"
+            />
+          </div>
         </div>
       </main>
 
