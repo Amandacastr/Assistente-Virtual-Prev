@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, ShieldCheck, TrendingUp, Shield, Phone, Globe, Instagram } from "lucide-react";
+import { ArrowRight, ShieldCheck, TrendingUp, Shield, Phone, Globe, Instagram, MessagesSquare } from "lucide-react";
 import { PrevMascot } from "@/components/PrevMascot";
 import { AgrosLogo } from "@/components/AgrosLogo";
 
