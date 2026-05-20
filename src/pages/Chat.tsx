@@ -145,7 +145,7 @@ const Chat = () => {
   };
 
   // Cor de acento por plano — classe fixa para o Tailwind não purgar
-  const accentBar = plan === "invest" ? "bg-primary/40" : "bg-accent/40";
+  const accentBar = plan === "invest" ? "bg-primary/40" : plan === "vida" ? "bg-accent/40" : "bg-emerald-400/40";
 
   return (
     <div className="flex flex-col h-[100dvh] bg-[hsl(var(--chat-bg))] text-[hsl(var(--chat-text))]">
