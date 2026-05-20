@@ -56,13 +56,13 @@ const Index = () => {
           Selecione um plano
         </p>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 w-full max-w-5xl">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full max-w-5xl items-stretch">
           {/* InvestPrev — botão com indicador de ação */}
           <PlanCard
             to="/chat/invest"
             tag="Aberto a novas adesões"
             tagTone="blue"
-            icon={<TrendingUp className="h-6 w-6 text-primary-glow" />}
+            icon={<TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary-glow" />}
             title="InvestPrev"
             desc="Plano de Contribuição Definida. Você escolhe quanto investir — a partir de R$ 100/mês — e constrói sua reserva no próprio ritmo."
             cta="Conversar sobre InvestPrev"
