@@ -56,13 +56,13 @@ const Index = () => {
           Selecione um plano
         </p>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 w-full max-w-5xl">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full max-w-5xl items-stretch">
           {/* InvestPrev — botão com indicador de ação */}
           <PlanCard
             to="/chat/invest"
             tag="Aberto a novas adesões"
             tagTone="blue"
-            icon={<TrendingUp className="h-6 w-6 text-primary-glow" />}
+            icon={<TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary-glow" />}
             title="InvestPrev"
             desc="Plano de Contribuição Definida. Você escolhe quanto investir — a partir de R$ 100/mês — e constrói sua reserva no próprio ritmo."
             cta="Conversar sobre InvestPrev"
@@ -73,23 +73,25 @@ const Index = () => {
             to="/chat/vida"
             tag="Plano exclusivo"
             tagTone="gold"
-            icon={<Shield className="h-6 w-6 text-accent" />}
+            icon={<Shield className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />}
             title="VidaPrev"
             desc="Plano exclusivo para participantes transferidos pelo Termo de Conciliação de 2021. Tire dúvidas sobre benefício, resgate e IR."
             cta="Conversar sobre VidaPrev"
             ctaTone="gold"
           />
           {/* Outros Assuntos — saúde, boletos, notícias e admin */}
-          <PlanCard
-            to="/chat/outros"
-            tag="Demais demandas"
-            tagTone="blue"
-            icon={<MessagesSquare className="h-6 w-6 text-primary-glow" />}
-            title="Outros Assuntos"
-            desc="Tire suas dúvidas sobre plano de saúde, emissão de boletos, mensalidades, notícias e demandas administrativas gerais do Agros."
-            cta="Conversar sobre Outros Assuntos"
-            ctaTone="blue"
-          />
+          <div className="sm:col-span-2 lg:col-span-1 sm:max-w-md sm:mx-auto sm:w-full lg:max-w-none">
+            <PlanCard
+              to="/chat/outros"
+              tag="Demais demandas"
+              tagTone="green"
+              icon={<MessagesSquare className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-300" />}
+              title="Outros Assuntos"
+              desc="Tire suas dúvidas sobre plano de saúde, emissão de boletos, mensalidades, notícias e demandas administrativas gerais do Agros."
+              cta="Conversar sobre Outros Assuntos"
+              ctaTone="green"
+            />
+          </div>
         </div>
       </main>
 
@@ -155,12 +157,12 @@ const Index = () => {
 interface CardProps {
   to: string;
   tag: string;
-  tagTone: "blue" | "gold";
+  tagTone: "blue" | "gold" | "green";
   icon: React.ReactNode;
   title: string;
   desc: string;
   cta: string;
-  ctaTone: "blue" | "gold";
+  ctaTone: "blue" | "gold" | "green";
   showArrowPulse?: boolean;
 }
 
@@ -168,36 +170,42 @@ const PlanCard = ({ to, tag, tagTone, icon, title, desc, cta, ctaTone, showArrow
   const tagCls =
     tagTone === "blue"
       ? "bg-primary-glow/30 text-sky-200 border-sky-300/20"
+      : tagTone === "green"
+      ? "bg-emerald-500/20 text-emerald-200 border-emerald-300/30"
       : "bg-accent/20 text-accent-glow border-accent/30";
   const iconWrapCls =
     tagTone === "blue"
       ? "bg-primary-glow/25 border-primary-glow/40"
+      : tagTone === "green"
+      ? "bg-emerald-500/15 border-emerald-400/40"
       : "bg-accent/15 border-accent/30";
   const btnCls =
     ctaTone === "blue"
       ? "bg-sky-700 text-white border-2 border-sky-700"
+      : ctaTone === "green"
+      ? "bg-emerald-600 text-white border-2 border-emerald-600"
       : "bg-accent/90 text-[hsl(30_40%_8%)] border border-accent";
 
   return (
     <Link
       to={to}
-      className="group relative block transition-all duration-300 hover:-translate-y-1.5"
+      className="group relative block h-full transition-all duration-300 hover:-translate-y-1.5"
     >
-      <div className="overflow-hidden rounded-3xl glass p-7 transition-all duration-300 group-hover:shadow-[var(--shadow-card)] group-hover:border-white/20">
+      <div className="flex h-full flex-col overflow-hidden rounded-3xl glass p-5 sm:p-7 transition-all duration-300 group-hover:shadow-[var(--shadow-card)] group-hover:border-white/20">
         <span
-          className={`absolute top-4 right-4 rounded-full border px-2.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider ${tagCls}`}
+          className={`absolute top-3 right-3 sm:top-4 sm:right-4 rounded-full border px-2.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider ${tagCls}`}
         >
           {tag}
         </span>
-        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${iconWrapCls} mb-4`}>
+        <div className={`flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl border ${iconWrapCls} mb-3 sm:mb-4`}>
           {icon}
         </div>
-        <h2 className="font-display text-3xl font-semibold text-white mb-2">{title}</h2>
-        <p className="text-[13.5px] font-light text-white/55 leading-relaxed mb-6">{desc}</p>
+        <h2 className="font-display text-2xl sm:text-3xl font-semibold text-white mb-2">{title}</h2>
+        <p className="text-[12.5px] sm:text-[13.5px] font-light text-white/55 leading-relaxed mb-5 sm:mb-6">{desc}</p>
 
         {/* Botão com indicador de ação */}
         <span
-          className={`relative inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13.5px] font-semibold transition-all group-hover:gap-3 ${btnCls}`}
+          className={`mt-auto self-start relative inline-flex items-center gap-2 rounded-full px-4 sm:px-5 py-2 sm:py-2.5 text-[12.5px] sm:text-[13.5px] font-semibold transition-all group-hover:gap-3 ${btnCls}`}
         >
           {showArrowPulse && (
             <span className="absolute -top-1 -right-1 flex h-3 w-3">
