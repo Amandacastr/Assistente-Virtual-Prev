@@ -7,7 +7,7 @@ import { PrevMascot } from "@/components/PrevMascot";
 import { AgrosLogo } from "@/components/AgrosLogo";
 import { toast } from "sonner";
 
-type Plan = "invest" | "vida";
+type Plan = "invest" | "vida" | "outros";
 
 interface Message {
   id: string;
@@ -38,6 +38,17 @@ const PLAN_META: Record<Plan, { name: string; intro: string; suggestions: string
       "O que acontece com o saldo após o falecimento?",
     ],
   },
+  outros: {
+    name: "Outros Assuntos",
+    intro:
+      "Olá! Sou a Prev, assistente do Agros. Aqui posso te ajudar com **plano de saúde, boletos, mensalidades, notícias e demandas administrativas**. Como posso ajudar?",
+    suggestions: [
+      "Como faço para emitir um boleto?",
+      "Qual o prazo de pagamento da mensalidade?",
+      "Como acesso o plano de saúde?",
+      "Quais as últimas notícias do Agros?",
+    ],
+  },
 };
 
 const getUserId = () => {
@@ -51,7 +62,7 @@ const getUserId = () => {
 
 const Chat = () => {
   const { plan } = useParams<{ plan: string }>();
-  if (plan !== "invest" && plan !== "vida") return <Navigate to="/" replace />;
+  if (plan !== "invest" && plan !== "vida" && plan !== "outros") return <Navigate to="/" replace />;
 
   const meta = PLAN_META[plan];
   const userId = useMemo(() => getUserId(), []);
@@ -134,7 +145,7 @@ const Chat = () => {
   };
 
   // Cor de acento por plano — classe fixa para o Tailwind não purgar
-  const accentBar = plan === "invest" ? "bg-primary/40" : "bg-accent/40";
+  const accentBar = plan === "invest" ? "bg-primary/40" : plan === "vida" ? "bg-accent/40" : "bg-emerald-400/40";
 
   return (
     <div className="flex flex-col h-[100dvh] bg-[hsl(var(--chat-bg))] text-[hsl(var(--chat-text))]">

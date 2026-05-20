@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, ShieldCheck, TrendingUp, Shield, Phone, Globe, Instagram } from "lucide-react";
+import { ArrowRight, ShieldCheck, TrendingUp, Shield, Phone, Globe, Instagram, MessagesSquare } from "lucide-react";
 import { PrevMascot } from "@/components/PrevMascot";
 import { AgrosLogo } from "@/components/AgrosLogo";
 
@@ -56,7 +56,7 @@ const Index = () => {
           Selecione um plano
         </p>
 
-        <div className="grid sm:grid-cols-2 gap-5 w-full max-w-3xl">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 w-full max-w-5xl">
           {/* InvestPrev — botão com indicador de ação */}
           <PlanCard
             to="/chat/invest"
@@ -78,6 +78,17 @@ const Index = () => {
             desc="Plano exclusivo para participantes transferidos pelo Termo de Conciliação de 2021. Tire dúvidas sobre benefício, resgate e IR."
             cta="Conversar sobre VidaPrev"
             ctaTone="gold"
+          />
+          {/* Outros Assuntos — saúde, boletos, notícias e admin */}
+          <PlanCard
+            to="/chat/outros"
+            tag="Demais demandas"
+            tagTone="blue"
+            icon={<MessagesSquare className="h-6 w-6 text-primary-glow" />}
+            title="Outros Assuntos"
+            desc="Tire suas dúvidas sobre plano de saúde, emissão de boletos, mensalidades, notícias e demandas administrativas gerais do Agros."
+            cta="Conversar sobre Outros Assuntos"
+            ctaTone="blue"
           />
         </div>
       </main>

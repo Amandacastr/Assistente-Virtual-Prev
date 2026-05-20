@@ -437,43 +437,156 @@ Perfil do VidaPrev (dados base dez/2023):
 const BASE_INVESTPREV = `${CONHECIMENTO_INVESTPREV}\n\n${CONHECIMENTO_IR}`;
 const BASE_VIDAPREV = `${CONHECIMENTO_VIDAPREV}\n\n${CONHECIMENTO_CARTILHA_VIDAPREV}\n\n${CONHECIMENTO_IR}\n\n${CONHECIMENTO_POLITICA}`;
 
-function montarPrompt(plano: string): string {
-  const isVida = plano === "vida";
-  const base = isVida ? BASE_VIDAPREV : BASE_INVESTPREV;
-  const nome = isVida ? "VidaPrev" : "InvestPrev";
+const CONHECIMENTO_OUTROS = `
+=== OUTROS ASSUNTOS — ÁREAS DE APOIO DO AGROS ===
+Este contexto cobre demandas administrativas gerais: plano de saúde, emissão de boletos,
+mensalidades, segunda via, atualização cadastral, notícias e comunicados.
 
-  return `Você é o Prev, assistente virtual do Agros para o plano ${nome}.
+--- PLANO DE SAÚDE AGROS ---
+- O Agros é operadora de plano de saúde desde 1994.
+- Os planos de saúde são oferecidos exclusivamente aos grupos familiares dos participantes
+  dos Planos Previdenciários vinculados às Patrocinadoras de Saúde.
+- Para manter o plano de saúde é obrigatório estar vinculado a um plano de previdência
+  do Agros (InvestPrev ou VidaPrev). Se o vínculo previdenciário cessar, o plano de saúde
+  é cancelado automaticamente.
+- Dúvidas operacionais (rede credenciada, autorizações, reembolsos, carteirinha) devem ser
+  tratadas diretamente com a equipe do Agros pelos canais oficiais.
+
+--- BOLETOS E MENSALIDADES ---
+- Vencimento padrão: até o 5º dia útil do mês.
+- Atraso gera multa de 2% sobre o valor da contribuição/mensalidade.
+- Segunda via de boleto e demonstrativos: pelo Autoatendimento em www.agros.org.br
+  (Autoatendimento → login e senha).
+- Demonstrativo de pagamento / contracheque: Autoatendimento → Demonstrativo de
+  Pagamento → Emitir → escolher ano e mês.
+
+--- NOTÍCIAS E COMUNICADOS ---
+- Página oficial de notícias: https://www.agros.org.br/noticias
+- FAQ / Perguntas frequentes: https://www.agros.org.br/faq
+- Sempre que o usuário perguntar sobre prazos recentes, cobranças do mês atual, comunicados
+  novos ou imprevistos operacionais, use a ferramenta fetch_url para consultar essas páginas
+  antes de responder.
+
+--- ATENDIMENTO HUMANO ---
+- Telefone / WhatsApp: (31) 3899-6550
+- Site: www.agros.org.br
+- Instagram: @agrosprevsaude
+`;
+
+const BASE_INVESTPREV = `${CONHECIMENTO_INVESTPREV}\n\n${CONHECIMENTO_IR}`;
+const BASE_VIDAPREV = `${CONHECIMENTO_VIDAPREV}\n\n${CONHECIMENTO_CARTILHA_VIDAPREV}\n\n${CONHECIMENTO_IR}\n\n${CONHECIMENTO_POLITICA}`;
+const BASE_OUTROS = `${CONHECIMENTO_OUTROS}\n\n${CONHECIMENTO_INVESTPREV}\n\n${CONHECIMENTO_VIDAPREV}\n\n${CONHECIMENTO_IR}`;
+
+type Contexto = "invest" | "vida" | "outros";
+
+function regrasPorContexto(ctx: Contexto): string {
+  if (ctx === "invest") {
+    return `CONTEXTO ATUAL: InvestPrev (o usuário entrou pelo cartão InvestPrev).
+LIMITE ESTRITO: responda APENAS sobre o regulamento, contribuições, benefícios, resgate, IR e regras do InvestPrev.
+Se o usuário perguntar sobre VidaPrev, plano de saúde, boletos ou outros assuntos, responda com educação:
+"Como estamos na aba do InvestPrev, meu foco é este plano. Para dúvidas de [VidaPrev / Saúde / Outros Assuntos], por favor, retorne à tela inicial e escolha o cartão correspondente."`;
+  }
+  if (ctx === "vida") {
+    return `CONTEXTO ATUAL: VidaPrev (o usuário entrou pelo cartão VidaPrev).
+LIMITE ESTRITO: responda APENAS sobre o regulamento, contribuições, benefícios, resgate, IR e regras do VidaPrev.
+Se o usuário perguntar sobre InvestPrev, plano de saúde, boletos ou outros assuntos, responda com educação:
+"Como estamos na aba do VidaPrev, meu foco é este plano. Para dúvidas de [InvestPrev / Saúde / Outros Assuntos], por favor, retorne à tela inicial e escolha o cartão correspondente."`;
+  }
+  return `CONTEXTO ATUAL: Outros Assuntos (o usuário entrou pelo cartão Outros Assuntos).
+ESCOPO: você é universal aqui. Responda sobre plano de saúde, boletos, mensalidades, notícias e demandas administrativas usando a base e a ferramenta fetch_url quando necessário (FAQ e Notícias do Agros).
+EXCEÇÃO IMPORTANTE: se o usuário perguntar sobre InvestPrev ou VidaPrev, NÃO o mande mudar de aba. Consulte a base de previdência, responda perfeitamente a dúvida e adicione ao final, em itálico, a nota sutil:
+"_(Dica: temos cartões específicos para o seu plano na tela inicial para consultas mais rápidas!)_"
+TRANSBORDO: se, após consultar a base e as páginas do Agros, você não tiver certeza da resposta, peça desculpas, informe que é uma IA em treinamento e diga literalmente:
+"Vou transferir você agora mesmo para a nossa equipe de atendimento humano continuar de onde paramos, por favor, aguarde um instante." — em seguida, informe o telefone (31) 3899-6550.`;
+}
+
+function montarPrompt(ctx: Contexto): string {
+  const base = ctx === "vida" ? BASE_VIDAPREV : ctx === "outros" ? BASE_OUTROS : BASE_INVESTPREV;
+  const nomeCtx = ctx === "vida" ? "VidaPrev" : ctx === "outros" ? "Outros Assuntos" : "InvestPrev";
+
+  return `Você é a Prev, assistente virtual do Agros.
+
+${regrasPorContexto(ctx)}
 
 ESTILO DE RESPOSTA (OBRIGATÓRIO):
-- CURTO, DIRETO E OBJETIVO. Pense em uma mensagem de chat, não em um artigo.
+- CURTA, DIRETA E OBJETIVA. Pense em uma mensagem de chat, não em um artigo.
 - Limite máximo: 3 parágrafos curtos OU uma lista com até 5 itens enxutos.
-- Vá direto ao ponto. SEM introduções, saudações repetidas ("Olá!", "Claro!", "Com certeza!"), agradecimentos ou frases de preenchimento.
-- SEM repetir a pergunta do usuário. SEM resumos no final ("Espero ter ajudado...").
-- Use linguagem simples, frases curtas. Negrito apenas em números/prazos chave.
+- Vá direto ao ponto. SEM introduções, saudações repetidas, agradecimentos ou frases de preenchimento.
+- SEM repetir a pergunta. SEM resumos finais.
+- Use linguagem simples, frases curtas. Negrito apenas em números/prazos-chave.
 - Quando citar regra, mencione o artigo entre parênteses: "(Art. X)".
 - Se a pergunta for vaga, faça UMA pergunta curta de esclarecimento.
-- Se não souber, diga em uma frase e indique contatar o Agros.
-- NUNCA invente. Use somente a base abaixo.
-- Responda apenas sobre ${nome}, Agros e previdência complementar. Recuse outros temas em uma frase.
-- Só cite o telefone quando realmente precisar de atendimento humano.
+- NUNCA invente. Use somente a base abaixo e, quando autorizado, a ferramenta fetch_url.
+- Só cite o telefone (31) 3899-6550 quando realmente precisar de atendimento humano.
 
 TRATAMENTO DE LINGUAGEM E ERROS DE DIGITAÇÃO (CRÍTICO):
 - O público é diverso em idade e familiaridade com tecnologia. Seja EXTREMAMENTE TOLERANTE a erros de digitação, ortografia, gramática, falta de acentuação e abreviações informais (ex.: "vc", "tbm", "q", "pq", "tb", "obg", "blz", "invest previ", "vida preve", "previdencia", "aposentadoria compl").
 - Sempre analise o CONTEXTO para entender a intenção real, mesmo que a frase esteja mal escrita, confusa ou incompleta.
-- REGRA DE OURO: NUNCA corrija o usuário, NUNCA aponte o erro ortográfico, NUNCA peça para ele reescrever "corretamente" ou de outra forma. Apenas interprete silenciosamente e responda com naturalidade, clareza e empatia, entregando a informação correta sobre o plano.
-- Se houver ambiguidade real sobre a intenção, faça UMA pergunta curta e gentil de esclarecimento — sem mencionar erros de escrita.
+- REGRA DE OURO: NUNCA corrija o usuário, NUNCA aponte erro ortográfico, NUNCA peça para reescrever. Interprete silenciosamente e responda com naturalidade, clareza e empatia.
+
+FERRAMENTA fetch_url (LEITURA DE WEB EM TEMPO REAL):
+- Use a ferramenta fetch_url quando o usuário perguntar sobre informações que podem ter mudado recentemente: prazos do mês atual, cobranças, comunicados, notícias, datas de assembleia, novidades operacionais.
+- URLs permitidas: somente dentro do domínio agros.org.br (ex.: https://www.agros.org.br/noticias, https://www.agros.org.br/faq, https://www.agros.org.br/previdencia/vidaprev).
+- Use no máximo 2 chamadas por resposta. Se a página não trouxer a informação, não invente — siga o fluxo de transbordo.
 
 CONTATOS DO AGROS:
 - Telefone / WhatsApp: (31) 3899-6550
 - Site: www.agros.org.br
-- Instagram: @agrosprevsaude (https://www.instagram.com/agrosprevsaude)
+- Instagram: @agrosprevsaude
 
-BASE DE CONHECIMENTO — ${nome.toUpperCase()}:
+BASE DE CONHECIMENTO — ${nomeCtx.toUpperCase()}:
 ${base}`.trim();
 }
 
-// Histórico em memória por (user_id + plano). Reinicia a cada cold start.
-const conversationStore = new Map<string, Array<{ role: string; content: string }>>();
+// Histórico em memória por (user_id + contexto). Reinicia a cada cold start.
+const conversationStore = new Map<string, Array<{ role: string; content: string; tool_call_id?: string; tool_calls?: unknown; name?: string }>>();
+
+// ------------ Ferramenta: fetch_url (apenas agros.org.br) ------------
+const TOOLS = [
+  {
+    type: "function",
+    function: {
+      name: "fetch_url",
+      description:
+        "Busca o conteúdo textual de uma página pública do site do Agros (agros.org.br). Use para consultar notícias, FAQ ou páginas oficiais quando precisar de dados atualizados.",
+      parameters: {
+        type: "object",
+        properties: {
+          url: {
+            type: "string",
+            description: "URL completa começando com https://www.agros.org.br ou https://agros.org.br",
+          },
+        },
+        required: ["url"],
+      },
+    },
+  },
+];
+
+async function executarFetchUrl(url: string): Promise<string> {
+  try {
+    const u = new URL(url);
+    if (!/(^|\.)agros\.org\.br$/i.test(u.hostname)) {
+      return "Erro: somente URLs de agros.org.br são permitidas.";
+    }
+    const res = await fetch(u.toString(), {
+      headers: { "User-Agent": "Mozilla/5.0 (PrevBot Agros)" },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return `Erro HTTP ${res.status} ao acessar ${u.toString()}.`;
+    const html = await res.text();
+    // Extrai texto bruto (remove tags, scripts e estilos)
+    const limpo = html
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return limpo.slice(0, 4000);
+  } catch (e) {
+    return `Erro ao acessar a URL: ${(e as Error).message}`;
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -492,7 +605,8 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const userId = String(body.user_id ?? "").trim();
     let mensagem = String(body.message ?? "").trim();
-    const plano = body.assistant === "vida" ? "vida" : "invest";
+    const ctx: Contexto =
+      body.assistant === "vida" ? "vida" : body.assistant === "outros" ? "outros" : "invest";
 
     if (!userId || !mensagem) {
       return new Response(
@@ -503,41 +617,90 @@ Deno.serve(async (req) => {
 
     mensagem = mensagem.slice(0, 500);
 
-    const chave = `${userId}_${plano}`;
+    const chave = `${userId}_${ctx}`;
     const historico = conversationStore.get(chave) ?? [];
     historico.push({ role: "user", content: mensagem });
-    const ultimas = historico.slice(-10);
+    // Mantém últimas 10 trocas (mas preserva pares tool-call/tool-response)
+    const ultimas = historico.slice(-12);
 
-    const payload = {
-      model: GROQ_MODEL,
-      messages: [
-        { role: "system", content: montarPrompt(plano) },
-        ...ultimas,
-      ],
-      max_tokens: 280,
-      temperature: 0.2,
-    };
+    const mensagensIA: Array<Record<string, unknown>> = [
+      { role: "system", content: montarPrompt(ctx) },
+      ...ultimas.map((m) => ({ ...m })),
+    ];
 
-    const groqRes = await fetch(GROQ_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    let textoResposta = "";
+    // Loop de tool-calls (máx. 3 iterações)
+    for (let iter = 0; iter < 4; iter++) {
+      const payload: Record<string, unknown> = {
+        model: GROQ_MODEL,
+        messages: mensagensIA,
+        max_tokens: 400,
+        temperature: 0.2,
+      };
+      // Só oferecemos a ferramenta no contexto "outros"
+      if (ctx === "outros") {
+        payload.tools = TOOLS;
+        payload.tool_choice = "auto";
+      }
 
-    if (!groqRes.ok) {
-      const errText = await groqRes.text();
-      console.error(`Groq erro ${groqRes.status}: ${errText}`);
-      return new Response(
-        JSON.stringify({ error: "Erro ao processar. Tente novamente." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      const groqRes = await fetch(GROQ_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!groqRes.ok) {
+        const errText = await groqRes.text();
+        console.error(`Groq erro ${groqRes.status}: ${errText}`);
+        return new Response(
+          JSON.stringify({ error: "Erro ao processar. Tente novamente." }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const data = await groqRes.json();
+      const msg = data?.choices?.[0]?.message;
+      const toolCalls = msg?.tool_calls;
+
+      if (toolCalls && Array.isArray(toolCalls) && toolCalls.length > 0) {
+        // Adiciona resposta do assistente (com tool_calls) ao histórico de execução
+        mensagensIA.push({
+          role: "assistant",
+          content: msg.content ?? "",
+          tool_calls: toolCalls,
+        });
+        for (const tc of toolCalls) {
+          if (tc?.function?.name === "fetch_url") {
+            let url = "";
+            try {
+              url = JSON.parse(tc.function.arguments ?? "{}").url ?? "";
+            } catch { /* ignore */ }
+            const resultado = await executarFetchUrl(url);
+            mensagensIA.push({
+              role: "tool",
+              tool_call_id: tc.id,
+              name: "fetch_url",
+              content: resultado,
+            });
+          } else {
+            mensagensIA.push({
+              role: "tool",
+              tool_call_id: tc.id,
+              name: tc?.function?.name ?? "unknown",
+              content: "Ferramenta desconhecida.",
+            });
+          }
+        }
+        // continua loop para que o modelo gere a resposta final usando o resultado
+        continue;
+      }
+
+      textoResposta = msg?.content ?? "";
+      break;
     }
-
-    const data = await groqRes.json();
-    const textoResposta: string = data?.choices?.[0]?.message?.content ?? "";
 
     historico.push({ role: "assistant", content: textoResposta });
     conversationStore.set(chave, historico);
