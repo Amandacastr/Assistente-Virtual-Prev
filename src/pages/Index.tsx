@@ -62,7 +62,7 @@ const Index = () => {
             to="/chat/invest"
             tag="Aberto a novas adesões"
             tagTone="blue"
-            icon={<TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary-glow" />}
+            icon={<TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-sky-300" />}
             title="InvestPrev"
             desc="Plano de Contribuição Definida. Você escolhe quanto investir — a partir de R$ 100/mês — e constrói sua reserva no próprio ritmo."
             cta="Conversar sobre InvestPrev"
@@ -175,7 +175,7 @@ const PlanCard = ({ to, tag, tagTone, icon, title, desc, cta, ctaTone, showArrow
       : "bg-accent/20 text-accent-glow border-accent/30";
   const iconWrapCls =
     tagTone === "blue"
-      ? "bg-primary-glow/25 border-primary-glow/40"
+      ? "bg-sky-700/15 border-sky-600/40"
       : tagTone === "green"
       ? "bg-emerald-500/15 border-emerald-400/40"
       : "bg-accent/15 border-accent/30";
