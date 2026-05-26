@@ -62,7 +62,7 @@ const Index = () => {
             to="/chat/invest"
             tag="Aberto a novas adesões"
             tagTone="blue"
-            icon={<TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary-glow" />}
+            icon={<TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-sky-300" />}
             title="InvestPrev"
             desc="Plano de Contribuição Definida. Você escolhe quanto investir — a partir de R$ 100/mês — e constrói sua reserva no próprio ritmo."
             cta="Conversar sobre InvestPrev"
