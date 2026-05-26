@@ -175,7 +175,7 @@ const PlanCard = ({ to, tag, tagTone, icon, title, desc, cta, ctaTone, showArrow
       : "bg-accent/20 text-accent-glow border-accent/30";
   const iconWrapCls =
     tagTone === "blue"
-      ? "bg-primary-glow/25 border-primary-glow/40"
+      ? "bg-sky-700/15 border-sky-600/40"
       : tagTone === "green"
       ? "bg-emerald-500/15 border-emerald-400/40"
       : "bg-accent/15 border-accent/30";
