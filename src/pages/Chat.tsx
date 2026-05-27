@@ -99,7 +99,7 @@ const Chat = () => {
 
   const HANDOFF_MSG =
     "Aguarde, você será atendido em breve por um de nossos especialistas.";
-  const HANDOFF_WEBHOOK = "https://ctrl-worldcat-ralph-casey.trycloudflare.com/webhook/transbordo";
+  const HANDOFF_WEBHOOK = "http://localhost:5678/webhook-test/transbordo";
 
   const USER_HANDOFF_PATTERNS = [
     /falar\s+com\s+(um\s+)?(atendente|humano|pessoa|algu[ée]m|especialista|consultor|operador)/i,
@@ -119,7 +119,7 @@ const Chat = () => {
     /n[ãa]o\s+est[áa]\s+(na|em)\s+(minha\s+)?base/i,
   ];
 
-  const triggerHandoff = async (history: Message[]) => {
+  const triggerHandoff = async (history: Message[], motivo: string) => {
     try {
       await fetch(HANDOFF_WEBHOOK, {
         method: "POST",
@@ -128,6 +128,9 @@ const Chat = () => {
           user_id: userId,
           assistant: plan,
           timestamp: new Date().toISOString(),
+          motivo,
+          nome: localStorage.getItem("agros_user_name") || null,
+          numero: localStorage.getItem("agros_user_phone") || null,
           history: history.map(({ role, content }) => ({ role, content })),
         }),
       });
@@ -156,7 +159,7 @@ const Chat = () => {
         content: HANDOFF_MSG,
       };
       setMessages([...baseHistory, handoffMsg]);
-      triggerHandoff([...baseHistory, handoffMsg]);
+      triggerHandoff([...baseHistory, handoffMsg], "solicitado_pelo_usuario");
       return;
     }
 
@@ -183,7 +186,7 @@ const Chat = () => {
         };
         newHistory = [...newHistory, handoffMsg];
         setMessages(newHistory);
-        triggerHandoff(newHistory);
+        triggerHandoff(newHistory, "ia_nao_soube_responder");
       }
     } catch (err) {
       console.error(err);
