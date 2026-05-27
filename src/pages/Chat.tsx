@@ -159,7 +159,7 @@ const Chat = () => {
         content: HANDOFF_MSG,
       };
       setMessages([...baseHistory, handoffMsg]);
-      triggerHandoff([...baseHistory, handoffMsg]);
+      triggerHandoff([...baseHistory, handoffMsg], "solicitado_pelo_usuario");
       return;
     }
 
@@ -186,7 +186,7 @@ const Chat = () => {
         };
         newHistory = [...newHistory, handoffMsg];
         setMessages(newHistory);
-        triggerHandoff(newHistory);
+        triggerHandoff(newHistory, "ia_nao_soube_responder");
       }
     } catch (err) {
       console.error(err);
