@@ -119,7 +119,7 @@ const Chat = () => {
     /n[ãa]o\s+est[áa]\s+(na|em)\s+(minha\s+)?base/i,
   ];
 
-  const triggerHandoff = async (history: Message[]) => {
+  const triggerHandoff = async (history: Message[], motivo: string) => {
     try {
       await fetch(HANDOFF_WEBHOOK, {
         method: "POST",
@@ -128,6 +128,9 @@ const Chat = () => {
           user_id: userId,
           assistant: plan,
           timestamp: new Date().toISOString(),
+          motivo,
+          nome: localStorage.getItem("agros_user_name") || null,
+          numero: localStorage.getItem("agros_user_phone") || null,
           history: history.map(({ role, content }) => ({ role, content })),
         }),
       });
