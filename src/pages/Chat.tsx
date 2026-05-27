@@ -97,17 +97,69 @@ const Chat = () => {
     el.style.height = Math.min(el.scrollHeight, 130) + "px";
   };
 
+  const HANDOFF_MSG =
+    "Aguarde, você será atendido em breve por um de nossos especialistas.";
+  const HANDOFF_WEBHOOK = "http://localhost:5678/webhook/transbordo";
+
+  const USER_HANDOFF_PATTERNS = [
+    /falar\s+com\s+(um\s+)?(atendente|humano|pessoa|algu[ée]m|especialista|consultor|operador)/i,
+    /atendente\s+humano/i,
+    /quero\s+falar\s+com\s+algu[ée]m/i,
+    /transbordo/i,
+    /atendimento\s+humano/i,
+  ];
+
+  const AI_HANDOFF_PATTERNS = [
+    /n[ãa]o\s+(sei|tenho|possuo|consigo|encontrei|localizei|disponho|tenho\s+como)/i,
+    /n[ãa]o\s+(tenho|possuo|encontrei)\s+(essa|a)\s+informa[çc][ãa]o/i,
+    /n[ãa]o\s+(fui|estou)\s+(capaz|apto)/i,
+    /sem\s+informa[çc][ãa]o/i,
+    /n[ãa]o\s+posso\s+(ajudar|responder|informar)/i,
+    /fora\s+do\s+meu\s+(escopo|conhecimento)/i,
+    /n[ãa]o\s+est[áa]\s+(na|em)\s+(minha\s+)?base/i,
+  ];
+
+  const triggerHandoff = async (history: Message[]) => {
+    try {
+      await fetch(HANDOFF_WEBHOOK, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId,
+          assistant: plan,
+          timestamp: new Date().toISOString(),
+          history: history.map(({ role, content }) => ({ role, content })),
+        }),
+      });
+    } catch (e) {
+      console.error("Falha ao enviar transbordo:", e);
+    }
+  };
+
   const sendMessage = async (text: string) => {
     const trimmed = text.trim().slice(0, 500);
     if (!trimmed || loading) return;
 
     const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: trimmed };
-    setMessages((m) => [...m, userMsg]);
+    const baseHistory = [...messages, userMsg];
+    setMessages(baseHistory);
     setInput("");
-    // Reset textarea height
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
+
+    // 1) Transbordo solicitado pelo usuário
+    if (USER_HANDOFF_PATTERNS.some((r) => r.test(trimmed))) {
+      const handoffMsg: Message = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: HANDOFF_MSG,
+      };
+      setMessages([...baseHistory, handoffMsg]);
+      triggerHandoff([...baseHistory, handoffMsg]);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -118,10 +170,21 @@ const Chat = () => {
       const reply = (data as { response?: string; error?: string })?.response;
       if (!reply) throw new Error((data as any)?.error || "Resposta inválida");
 
-      setMessages((m) => [
-        ...m,
-        { id: crypto.randomUUID(), role: "assistant", content: reply },
-      ]);
+      const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: reply };
+      let newHistory = [...baseHistory, aiMsg];
+      setMessages(newHistory);
+
+      // 2) Transbordo automático se a IA não souber responder
+      if (AI_HANDOFF_PATTERNS.some((r) => r.test(reply))) {
+        const handoffMsg: Message = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: HANDOFF_MSG,
+        };
+        newHistory = [...newHistory, handoffMsg];
+        setMessages(newHistory);
+        triggerHandoff(newHistory);
+      }
     } catch (err) {
       console.error(err);
       toast.error("Não consegui responder agora. Tente novamente em instantes.");
