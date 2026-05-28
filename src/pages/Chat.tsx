@@ -78,6 +78,21 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Modal de coleta de contato para transbordo
+  const [handoffOpen, setHandoffOpen] = useState(false);
+  const [handoffName, setHandoffName] = useState(
+    () => localStorage.getItem("agros_user_name") || ""
+  );
+  const [handoffPhone, setHandoffPhone] = useState(
+    () => localStorage.getItem("agros_user_phone") || ""
+  );
+  // Contexto pendente para o webhook (preenchido ao detectar handoff)
+  const pendingHandoffRef = useRef<{
+    history: Message[];
+    motivo: string;
+    mensagem: string;
+  } | null>(null);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
