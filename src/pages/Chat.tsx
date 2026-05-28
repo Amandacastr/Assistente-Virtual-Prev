@@ -114,7 +114,7 @@ const Chat = () => {
 
   const HANDOFF_MSG =
     "Aguarde, você será atendido em breve por um de nossos especialistas.";
-  const HANDOFF_WEBHOOK = "https://testimony-citations-extraordinary-irc.trycloudflare.com/webhook/transbordo";
+  const HANDOFF_WEBHOOK = "http://localhost:5678/webhook-test/transbordo";
 
   const USER_HANDOFF_PATTERNS = [
     /falar\s+com\s+(um\s+)?(atendente|humano|pessoa|algu[ée]m|especialista|consultor|operador)/i,
