@@ -379,6 +379,58 @@ const Chat = () => {
           </a>.
         </p>
       </form>
+
+      {/* ── Modal de coleta para transbordo ── */}
+      {handoffOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <form
+            onSubmit={submitHandoffForm}
+            className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"
+          >
+            <h2 className="text-[15px] font-semibold text-[hsl(var(--chat-text))]">
+              Falar com um especialista
+            </h2>
+            <p className="mt-1 text-[12.5px] text-muted-foreground">
+              Informe seus dados para que possamos entrar em contato.
+            </p>
+            <div className="mt-4 space-y-3">
+              <input
+                type="text"
+                value={handoffName}
+                onChange={(e) => setHandoffName(e.target.value)}
+                placeholder="Seu nome"
+                autoFocus
+                className="w-full rounded-xl border border-[hsl(var(--chat-border))] bg-[hsl(var(--chat-bg))] px-3.5 py-2.5 text-[14px] outline-none focus:border-primary/50"
+              />
+              <input
+                type="tel"
+                value={handoffPhone}
+                onChange={(e) => setHandoffPhone(e.target.value)}
+                placeholder="Telefone com DDD"
+                className="w-full rounded-xl border border-[hsl(var(--chat-border))] bg-[hsl(var(--chat-bg))] px-3.5 py-2.5 text-[14px] outline-none focus:border-primary/50"
+              />
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setHandoffOpen(false);
+                  pendingHandoffRef.current = null;
+                }}
+                className="rounded-full px-4 py-2 text-[13px] text-muted-foreground hover:text-[hsl(var(--chat-text))]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="rounded-full bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground shadow hover:bg-primary-glow"
+              >
+                Enviar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
