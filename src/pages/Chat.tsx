@@ -78,6 +78,21 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Modal de coleta de contato para transbordo
+  const [handoffOpen, setHandoffOpen] = useState(false);
+  const [handoffName, setHandoffName] = useState(
+    () => localStorage.getItem("agros_user_name") || ""
+  );
+  const [handoffPhone, setHandoffPhone] = useState(
+    () => localStorage.getItem("agros_user_phone") || ""
+  );
+  // Contexto pendente para o webhook (preenchido ao detectar handoff)
+  const pendingHandoffRef = useRef<{
+    history: Message[];
+    motivo: string;
+    mensagem: string;
+  } | null>(null);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -119,7 +134,13 @@ const Chat = () => {
     /n[ãa]o\s+est[áa]\s+(na|em)\s+(minha\s+)?base/i,
   ];
 
-  const triggerHandoff = async (history: Message[], motivo: string) => {
+  const triggerHandoff = async (
+    history: Message[],
+    motivo: string,
+    mensagem: string,
+    nome: string,
+    numero: string
+  ) => {
     try {
       await fetch(HANDOFF_WEBHOOK, {
         method: "POST",
@@ -129,14 +150,58 @@ const Chat = () => {
           assistant: plan,
           timestamp: new Date().toISOString(),
           motivo,
-          nome: localStorage.getItem("agros_user_name") || null,
-          numero: localStorage.getItem("agros_user_phone") || null,
+          nome,
+          numero,
+          telefone: numero,
+          mensagem,
           history: history.map(({ role, content }) => ({ role, content })),
         }),
       });
     } catch (e) {
       console.error("Falha ao enviar transbordo:", e);
     }
+  };
+
+  // Abre o modal pedindo nome/telefone (ou dispara direto se já temos)
+  const requestHandoff = (history: Message[], motivo: string, mensagem: string) => {
+    const nome = localStorage.getItem("agros_user_name") || "";
+    const numero = localStorage.getItem("agros_user_phone") || "";
+    pendingHandoffRef.current = { history, motivo, mensagem };
+    if (nome && numero) {
+      finalizeHandoff(nome, numero);
+    } else {
+      setHandoffName(nome);
+      setHandoffPhone(numero);
+      setHandoffOpen(true);
+    }
+  };
+
+  const finalizeHandoff = (nome: string, numero: string) => {
+    const ctx = pendingHandoffRef.current;
+    if (!ctx) return;
+    pendingHandoffRef.current = null;
+    localStorage.setItem("agros_user_name", nome);
+    localStorage.setItem("agros_user_phone", numero);
+    const handoffMsg: Message = {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      content: HANDOFF_MSG,
+    };
+    const newHistory = [...ctx.history, handoffMsg];
+    setMessages(newHistory);
+    triggerHandoff(newHistory, ctx.motivo, ctx.mensagem, nome, numero);
+  };
+
+  const submitHandoffForm = (e: React.FormEvent) => {
+    e.preventDefault();
+    const nome = handoffName.trim();
+    const numero = handoffPhone.trim();
+    if (!nome || !numero) {
+      toast.error("Informe seu nome e telefone para continuar.");
+      return;
+    }
+    setHandoffOpen(false);
+    finalizeHandoff(nome, numero);
   };
 
   const sendMessage = async (text: string) => {
@@ -153,13 +218,7 @@ const Chat = () => {
 
     // 1) Transbordo solicitado pelo usuário
     if (USER_HANDOFF_PATTERNS.some((r) => r.test(trimmed))) {
-      const handoffMsg: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: HANDOFF_MSG,
-      };
-      setMessages([...baseHistory, handoffMsg]);
-      triggerHandoff([...baseHistory, handoffMsg], "solicitado_pelo_usuario");
+      requestHandoff(baseHistory, "solicitado_pelo_usuario", trimmed);
       return;
     }
 
@@ -174,19 +233,12 @@ const Chat = () => {
       if (!reply) throw new Error((data as any)?.error || "Resposta inválida");
 
       const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: reply };
-      let newHistory = [...baseHistory, aiMsg];
+      const newHistory = [...baseHistory, aiMsg];
       setMessages(newHistory);
 
       // 2) Transbordo automático se a IA não souber responder
       if (AI_HANDOFF_PATTERNS.some((r) => r.test(reply))) {
-        const handoffMsg: Message = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: HANDOFF_MSG,
-        };
-        newHistory = [...newHistory, handoffMsg];
-        setMessages(newHistory);
-        triggerHandoff(newHistory, "ia_nao_soube_responder");
+        requestHandoff(newHistory, "ia_nao_soube_responder", trimmed);
       }
     } catch (err) {
       console.error(err);
@@ -327,6 +379,58 @@ const Chat = () => {
           </a>.
         </p>
       </form>
+
+      {/* ── Modal de coleta para transbordo ── */}
+      {handoffOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <form
+            onSubmit={submitHandoffForm}
+            className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"
+          >
+            <h2 className="text-[15px] font-semibold text-[hsl(var(--chat-text))]">
+              Falar com um especialista
+            </h2>
+            <p className="mt-1 text-[12.5px] text-muted-foreground">
+              Informe seus dados para que possamos entrar em contato.
+            </p>
+            <div className="mt-4 space-y-3">
+              <input
+                type="text"
+                value={handoffName}
+                onChange={(e) => setHandoffName(e.target.value)}
+                placeholder="Seu nome"
+                autoFocus
+                className="w-full rounded-xl border border-[hsl(var(--chat-border))] bg-[hsl(var(--chat-bg))] px-3.5 py-2.5 text-[14px] outline-none focus:border-primary/50"
+              />
+              <input
+                type="tel"
+                value={handoffPhone}
+                onChange={(e) => setHandoffPhone(e.target.value)}
+                placeholder="Telefone com DDD"
+                className="w-full rounded-xl border border-[hsl(var(--chat-border))] bg-[hsl(var(--chat-bg))] px-3.5 py-2.5 text-[14px] outline-none focus:border-primary/50"
+              />
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setHandoffOpen(false);
+                  pendingHandoffRef.current = null;
+                }}
+                className="rounded-full px-4 py-2 text-[13px] text-muted-foreground hover:text-[hsl(var(--chat-text))]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="rounded-full bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground shadow hover:bg-primary-glow"
+              >
+                Enviar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
