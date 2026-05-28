@@ -233,19 +233,12 @@ const Chat = () => {
       if (!reply) throw new Error((data as any)?.error || "Resposta inválida");
 
       const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: reply };
-      let newHistory = [...baseHistory, aiMsg];
+      const newHistory = [...baseHistory, aiMsg];
       setMessages(newHistory);
 
       // 2) Transbordo automático se a IA não souber responder
       if (AI_HANDOFF_PATTERNS.some((r) => r.test(reply))) {
-        const handoffMsg: Message = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: HANDOFF_MSG,
-        };
-        newHistory = [...newHistory, handoffMsg];
-        setMessages(newHistory);
-        triggerHandoff(newHistory, "ia_nao_soube_responder");
+        requestHandoff(newHistory, "ia_nao_soube_responder", trimmed);
       }
     } catch (err) {
       console.error(err);
