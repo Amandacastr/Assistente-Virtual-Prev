@@ -218,13 +218,7 @@ const Chat = () => {
 
     // 1) Transbordo solicitado pelo usuário
     if (USER_HANDOFF_PATTERNS.some((r) => r.test(trimmed))) {
-      const handoffMsg: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: HANDOFF_MSG,
-      };
-      setMessages([...baseHistory, handoffMsg]);
-      triggerHandoff([...baseHistory, handoffMsg], "solicitado_pelo_usuario");
+      requestHandoff(baseHistory, "solicitado_pelo_usuario", trimmed);
       return;
     }
 
