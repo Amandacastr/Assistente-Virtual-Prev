@@ -162,18 +162,12 @@ const Chat = () => {
     }
   };
 
-  // Abre o modal pedindo nome/telefone (ou dispara direto se já temos)
+  // Sempre abre o modal pedindo nome/telefone antes de disparar o webhook
   const requestHandoff = (history: Message[], motivo: string, mensagem: string) => {
-    const nome = localStorage.getItem("agros_user_name") || "";
-    const numero = localStorage.getItem("agros_user_phone") || "";
     pendingHandoffRef.current = { history, motivo, mensagem };
-    if (nome && numero) {
-      finalizeHandoff(nome, numero);
-    } else {
-      setHandoffName(nome);
-      setHandoffPhone(numero);
-      setHandoffOpen(true);
-    }
+    setHandoffName(localStorage.getItem("agros_user_name") || "");
+    setHandoffPhone(localStorage.getItem("agros_user_phone") || "");
+    setHandoffOpen(true);
   };
 
   const finalizeHandoff = (nome: string, numero: string) => {
