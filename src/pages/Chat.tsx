@@ -269,8 +269,8 @@ const Chat = () => {
       textareaRef.current.style.height = "auto";
     }
 
-    // 1) Transbordo solicitado pelo usuário
-    if (USER_HANDOFF_PATTERNS.some((r) => r.test(trimmed))) {
+    // 1) Transbordo solicitado pelo usuário (tolerante a erros de digitação)
+    if (isHandoffRequest(trimmed)) {
       requestHandoff(baseHistory, "solicitado_pelo_usuario", trimmed);
       return;
     }
@@ -285,13 +285,16 @@ const Chat = () => {
       const reply = (data as { response?: string; error?: string })?.response;
       if (!reply) throw new Error((data as any)?.error || "Resposta inválida");
 
-      const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: reply };
-      const newHistory = [...baseHistory, aiMsg];
-      setMessages(newHistory);
+      // Se a IA não soube responder OU tentou devolver número de telefone,
+      // força o transbordo e NÃO exibe a mensagem com contatos.
+      const shouldHandoff =
+        AI_HANDOFF_PATTERNS.some((r) => r.test(reply)) || containsPhoneNumber(reply);
 
-      // 2) Transbordo automático se a IA não souber responder
-      if (AI_HANDOFF_PATTERNS.some((r) => r.test(reply))) {
-        requestHandoff(newHistory, "ia_nao_soube_responder", trimmed);
+      if (shouldHandoff) {
+        requestHandoff(baseHistory, "ia_nao_soube_responder", trimmed);
+      } else {
+        const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: reply };
+        setMessages([...baseHistory, aiMsg]);
       }
     } catch (err) {
       console.error(err);
