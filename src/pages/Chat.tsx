@@ -201,8 +201,8 @@ const Chat = () => {
     numero: string
   ) => {
     try {
-      await fetch(HANDOFF_WEBHOOK, {
-        method: "POST",
+      const response = await fetch(HANDOFF_WEBHOOK, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: userId,
@@ -216,8 +216,9 @@ const Chat = () => {
           history: history.map(({ role, content }) => ({ role, content })),
         }),
       });
+      console.log("[Transbordo] Requisição PUT enviada com sucesso:", response.status, response.statusText);
     } catch (e) {
-      console.error("Falha ao enviar transbordo:", e);
+      console.error("[Transbordo] Falha ao enviar requisição PUT:", e);
     }
   };
 
