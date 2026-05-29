@@ -116,13 +116,72 @@ const Chat = () => {
     "Aguarde, você será atendido em breve por um de nossos especialistas.";
   const HANDOFF_WEBHOOK = "http://localhost:5678/webhook-test/transbordo";
 
-  const USER_HANDOFF_PATTERNS = [
-    /falar\s+com\s+(um\s+)?(atendente|humano|pessoa|algu[ée]m|especialista|consultor|operador)/i,
-    /atendente\s+humano/i,
-    /quero\s+falar\s+com\s+algu[ée]m/i,
-    /transbordo/i,
-    /atendimento\s+humano/i,
+  // Normaliza texto: minúsculo, sem acentos, sem pontuação
+  const normalize = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  // Distância de Levenshtein para tolerar erros de digitação
+  const levenshtein = (a: string, b: string): number => {
+    if (a === b) return 0;
+    if (!a.length) return b.length;
+    if (!b.length) return a.length;
+    const dp: number[][] = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+    for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+    for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+      }
+    }
+    return dp[a.length][b.length];
+  };
+
+  // Tolerância proporcional ao tamanho da palavra
+  const fuzzyTolerance = (w: string) => (w.length <= 4 ? 1 : w.length <= 7 ? 2 : 3);
+
+  // Palavras-chave fortes — sozinhas já indicam transbordo
+  const HANDOFF_STRONG = [
+    "atendente", "humano", "suporte", "atendimento", "transbordo",
+    "especialista", "consultor", "operador",
   ];
+  // Palavras-chave que precisam de verbo de intenção
+  const HANDOFF_WEAK = [
+    "pessoa", "alguem", "funcionario", "responsavel", "gerente", "representante", "ajuda",
+  ];
+  const INTENT_KEYWORDS = [
+    "falar", "conversar", "contato", "contatar", "chamar", "ligar",
+    "quero", "preciso", "gostaria", "desejo", "solicito", "queria",
+  ];
+
+  const fuzzyHas = (tokens: string[], target: string) => {
+    const tol = fuzzyTolerance(target);
+    return tokens.some((t) => {
+      if (Math.abs(t.length - target.length) > tol + 1) return false;
+      return t === target || levenshtein(t, target) <= tol;
+    });
+  };
+
+  const isHandoffRequest = (raw: string) => {
+    const norm = normalize(raw);
+    if (!norm) return false;
+    const tokens = norm.split(" ").filter((t) => t.length >= 2);
+    if (HANDOFF_STRONG.some((k) => fuzzyHas(tokens, k))) return true;
+    const weak = HANDOFF_WEAK.some((k) => fuzzyHas(tokens, k));
+    const intent = INTENT_KEYWORDS.some((k) => fuzzyHas(tokens, k));
+    return weak && intent;
+  };
+
+  // Detecta telefone na resposta da IA (para forçar transbordo em vez de números soltos)
+  const containsPhoneNumber = (s: string) =>
+    /(?:\(?\d{2}\)?[\s.-]?)?\d{4,5}[\s.-]?\d{4}/.test(s.replace(/\D(?=\d)/g, (m) => m));
+
 
   const AI_HANDOFF_PATTERNS = [
     /n[ãa]o\s+(sei|tenho|possuo|consigo|encontrei|localizei|disponho|tenho\s+como)/i,
@@ -210,8 +269,8 @@ const Chat = () => {
       textareaRef.current.style.height = "auto";
     }
 
-    // 1) Transbordo solicitado pelo usuário
-    if (USER_HANDOFF_PATTERNS.some((r) => r.test(trimmed))) {
+    // 1) Transbordo solicitado pelo usuário (tolerante a erros de digitação)
+    if (isHandoffRequest(trimmed)) {
       requestHandoff(baseHistory, "solicitado_pelo_usuario", trimmed);
       return;
     }
@@ -226,13 +285,16 @@ const Chat = () => {
       const reply = (data as { response?: string; error?: string })?.response;
       if (!reply) throw new Error((data as any)?.error || "Resposta inválida");
 
-      const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: reply };
-      const newHistory = [...baseHistory, aiMsg];
-      setMessages(newHistory);
+      // Se a IA não soube responder OU tentou devolver número de telefone,
+      // força o transbordo e NÃO exibe a mensagem com contatos.
+      const shouldHandoff =
+        AI_HANDOFF_PATTERNS.some((r) => r.test(reply)) || containsPhoneNumber(reply);
 
-      // 2) Transbordo automático se a IA não souber responder
-      if (AI_HANDOFF_PATTERNS.some((r) => r.test(reply))) {
-        requestHandoff(newHistory, "ia_nao_soube_responder", trimmed);
+      if (shouldHandoff) {
+        requestHandoff(baseHistory, "ia_nao_soube_responder", trimmed);
+      } else {
+        const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: reply };
+        setMessages([...baseHistory, aiMsg]);
       }
     } catch (err) {
       console.error(err);
