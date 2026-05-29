@@ -114,7 +114,7 @@ const Chat = () => {
 
   const HANDOFF_MSG =
     "Aguarde, você será atendido em breve por um de nossos especialistas.";
-  const HANDOFF_WEBHOOK = "http://localhost:5678/webhook-test/transbordo";
+  const HANDOFF_WEBHOOK = "https://girls-arch-settlement-elect.trycloudflare.com/webhook-test/transbordo";
 
   // Normaliza texto: minúsculo, sem acentos, sem pontuação
   const normalize = (s: string) =>
