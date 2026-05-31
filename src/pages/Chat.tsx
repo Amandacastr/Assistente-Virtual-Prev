@@ -168,7 +168,21 @@ const Chat = () => {
     });
   };
 
+  // Detecta intenção de buscar notícias/editais/novidades (tolerante a erros)
+  const NEWS_KEYWORDS = [
+    "noticia", "noticias", "novidade", "novidades", "atualizacao", "atualizacoes",
+    "edital", "editais", "comunicado", "comunicados", "informativo", "informativos",
+    "informe", "informes",
+  ];
+  const isNewsRequest = (raw: string) => {
+    const norm = normalize(raw);
+    if (!norm) return false;
+    const tokens = norm.split(" ").filter((t) => t.length >= 3);
+    return NEWS_KEYWORDS.some((k) => fuzzyHas(tokens, k));
+  };
+
   const isHandoffRequest = (raw: string) => {
+
     const norm = normalize(raw);
     if (!norm) return false;
     const tokens = norm.split(" ").filter((t) => t.length >= 2);
@@ -200,25 +214,42 @@ const Chat = () => {
     nome: string,
     numero: string
   ) => {
+    const payload = {
+      name: nome,
+      phone_number: numero,
+      // campos extras de contexto
+      nome,
+      numero,
+      telefone: numero,
+      user_id: userId,
+      assistant: plan,
+      timestamp: new Date().toISOString(),
+      motivo,
+      mensagem,
+      history: history.map(({ role, content }) => ({ role, content })),
+    };
+    console.log("[Transbordo] Disparando PUT para", HANDOFF_WEBHOOK, payload);
     try {
       const response = await fetch(HANDOFF_WEBHOOK, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userId,
-          assistant: plan,
-          timestamp: new Date().toISOString(),
-          motivo,
-          nome,
-          numero,
-          telefone: numero,
-          mensagem,
-          history: history.map(({ role, content }) => ({ role, content })),
-        }),
+        body: JSON.stringify(payload),
       });
-      console.log("[Transbordo] Requisição PUT enviada com sucesso:", response.status, response.statusText);
+      if (response.ok) {
+        console.log(
+          "[Transbordo] ✅ Requisição PUT enviada com sucesso:",
+          response.status,
+          response.statusText
+        );
+      } else {
+        console.error(
+          "[Transbordo] ❌ Webhook respondeu com erro:",
+          response.status,
+          response.statusText
+        );
+      }
     } catch (e) {
-      console.error("[Transbordo] Falha ao enviar requisição PUT:", e);
+      console.error("[Transbordo] ❌ Falha ao enviar requisição PUT:", e);
     }
   };
 
@@ -231,8 +262,11 @@ const Chat = () => {
   };
 
   const finalizeHandoff = (nome: string, numero: string) => {
-    const ctx = pendingHandoffRef.current;
-    if (!ctx) return;
+    const ctx = pendingHandoffRef.current ?? {
+      history: messages,
+      motivo: "solicitado_pelo_usuario",
+      mensagem: messages.filter((m) => m.role === "user").slice(-1)[0]?.content ?? "",
+    };
     pendingHandoffRef.current = null;
     localStorage.setItem("agros_user_name", nome);
     localStorage.setItem("agros_user_phone", numero);
@@ -248,6 +282,7 @@ const Chat = () => {
 
   const submitHandoffForm = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Enviando para o n8n...");
     const nome = handoffName.trim();
     const numero = handoffPhone.trim();
     if (!nome || !numero) {
@@ -257,6 +292,7 @@ const Chat = () => {
     setHandoffOpen(false);
     finalizeHandoff(nome, numero);
   };
+
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim().slice(0, 500);
@@ -276,7 +312,37 @@ const Chat = () => {
       return;
     }
 
+    // 2) Notícias / editais / atualizações — consulta a tabela `noticias` em tempo real
+    if (isNewsRequest(trimmed)) {
+      setLoading(true);
+      try {
+        const { data: noticias, error } = await supabase
+          .from("noticias")
+          .select("titulo, link, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5);
+        if (error) throw error;
+        const content =
+          noticias && noticias.length > 0
+            ? `📰 **Últimas notícias e atualizações do Agros:**\n\n${noticias
+                .map((n) => `- [${n.titulo}](${n.link})`)
+                .join("\n")}\n\nClique em um título para acessar a página completa.`
+            : "No momento não encontrei notícias cadastradas. Você pode acompanhar tudo em [agros.org.br/noticias](https://www.agros.org.br/noticias).";
+        setMessages([
+          ...baseHistory,
+          { id: crypto.randomUUID(), role: "assistant", content },
+        ]);
+      } catch (err) {
+        console.error("[Notícias] Erro ao consultar Supabase:", err);
+        toast.error("Não consegui buscar as notícias agora.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     setLoading(true);
+
 
     try {
       const { data, error } = await supabase.functions.invoke("chat", {
