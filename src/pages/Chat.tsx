@@ -168,7 +168,21 @@ const Chat = () => {
     });
   };
 
+  // Detecta intenção de buscar notícias/editais/novidades (tolerante a erros)
+  const NEWS_KEYWORDS = [
+    "noticia", "noticias", "novidade", "novidades", "atualizacao", "atualizacoes",
+    "edital", "editais", "comunicado", "comunicados", "informativo", "informativos",
+    "informe", "informes",
+  ];
+  const isNewsRequest = (raw: string) => {
+    const norm = normalize(raw);
+    if (!norm) return false;
+    const tokens = norm.split(" ").filter((t) => t.length >= 3);
+    return NEWS_KEYWORDS.some((k) => fuzzyHas(tokens, k));
+  };
+
   const isHandoffRequest = (raw: string) => {
+
     const norm = normalize(raw);
     if (!norm) return false;
     const tokens = norm.split(" ").filter((t) => t.length >= 2);
