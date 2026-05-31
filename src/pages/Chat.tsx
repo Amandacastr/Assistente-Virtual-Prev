@@ -298,7 +298,37 @@ const Chat = () => {
       return;
     }
 
+    // 2) Notícias / editais / atualizações — consulta a tabela `noticias` em tempo real
+    if (isNewsRequest(trimmed)) {
+      setLoading(true);
+      try {
+        const { data: noticias, error } = await supabase
+          .from("noticias")
+          .select("titulo, link, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5);
+        if (error) throw error;
+        const content =
+          noticias && noticias.length > 0
+            ? `📰 **Últimas notícias e atualizações do Agros:**\n\n${noticias
+                .map((n) => `- [${n.titulo}](${n.link})`)
+                .join("\n")}\n\nClique em um título para acessar a página completa.`
+            : "No momento não encontrei notícias cadastradas. Você pode acompanhar tudo em [agros.org.br/noticias](https://www.agros.org.br/noticias).";
+        setMessages([
+          ...baseHistory,
+          { id: crypto.randomUUID(), role: "assistant", content },
+        ]);
+      } catch (err) {
+        console.error("[Notícias] Erro ao consultar Supabase:", err);
+        toast.error("Não consegui buscar as notícias agora.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     setLoading(true);
+
 
     try {
       const { data, error } = await supabase.functions.invoke("chat", {
