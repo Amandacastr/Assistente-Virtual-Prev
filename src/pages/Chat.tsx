@@ -480,12 +480,23 @@ const Chat = () => {
             <Send className="h-4 w-4" />
           </button>
         </div>
-        <p className="mx-auto mt-1.5 max-w-2xl text-[10.5px] text-muted-foreground">
-          Respostas geradas por IA. Em caso de dúvida, ligue{" "}
-          <a href="tel:3138996550" className="underline underline-offset-2 hover:text-primary transition">
-            (31) 3899-6550
-          </a>.
-        </p>
+        <div className="mx-auto mt-2 flex max-w-2xl items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() =>
+              requestHandoff(messages, "solicitado_pelo_usuario", "Usuário solicitou falar com atendente.")
+            }
+            className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-[11.5px] font-medium text-primary hover:bg-primary/10 transition"
+          >
+            Falar com atendente
+          </button>
+          <p className="text-[10.5px] text-muted-foreground">
+            Respostas geradas por IA. Em caso de dúvida, ligue{" "}
+            <a href="tel:3138996550" className="underline underline-offset-2 hover:text-primary transition">
+              (31) 3899-6550
+            </a>.
+          </p>
+        </div>
       </form>
 
       {/* ── Modal de coleta para transbordo ── */}
