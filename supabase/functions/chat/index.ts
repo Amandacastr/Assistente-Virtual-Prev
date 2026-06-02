@@ -605,6 +605,7 @@ Deno.serve(async (req) => {
     let mensagem = String(body.message ?? "").trim();
     const ctx: Contexto =
       body.assistant === "vida" ? "vida" : body.assistant === "outros" ? "outros" : "invest";
+    const clientHistory = Array.isArray(body.history) ? body.history : [];
 
     if (!userId || !mensagem) {
       return new Response(
@@ -616,10 +617,23 @@ Deno.serve(async (req) => {
     mensagem = mensagem.slice(0, 500);
 
     const chave = `${userId}_${ctx}`;
-    const historico = conversationStore.get(chave) ?? [];
-    historico.push({ role: "user", content: mensagem });
-    // Mantém últimas 10 trocas (mas preserva pares tool-call/tool-response)
-    const ultimas = historico.slice(-12);
+    // Prioriza o histórico enviado pelo cliente (fonte da verdade — edge functions são stateless).
+    // Mantém o store em memória apenas como fallback se o cliente não enviar nada.
+    let historico: Array<{ role: string; content: string; tool_call_id?: string; tool_calls?: unknown; name?: string }> = [];
+    if (clientHistory.length > 0) {
+      historico = clientHistory
+        .filter((m: any) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+        .map((m: any) => ({ role: m.role, content: String(m.content).slice(0, 2000) }));
+      // garante que a última mensagem do usuário seja a atual
+      if (!historico.length || historico[historico.length - 1].role !== "user" || historico[historico.length - 1].content !== mensagem) {
+        historico.push({ role: "user", content: mensagem });
+      }
+    } else {
+      historico = conversationStore.get(chave) ?? [];
+      historico.push({ role: "user", content: mensagem });
+    }
+    // Mantém últimas trocas (preserva pares tool-call/tool-response)
+    const ultimas = historico.slice(-20);
 
     const mensagensIA: Array<Record<string, unknown>> = [
       { role: "system", content: montarPrompt(ctx) },

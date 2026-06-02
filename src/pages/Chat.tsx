@@ -339,8 +339,11 @@ const Chat = () => {
 
 
     try {
+      const history = baseHistory
+        .filter((m) => m.id !== "intro")
+        .map(({ role, content }) => ({ role, content }));
       const { data, error } = await supabase.functions.invoke("chat", {
-        body: { user_id: userId, message: trimmed, assistant: plan },
+        body: { user_id: userId, message: trimmed, assistant: plan, history },
       });
       if (error) throw error;
       const reply = (data as { response?: string; error?: string })?.response;
