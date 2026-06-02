@@ -346,17 +346,8 @@ const Chat = () => {
       const reply = (data as { response?: string; error?: string })?.response;
       if (!reply) throw new Error((data as any)?.error || "Resposta inválida");
 
-      // Se a IA não soube responder OU tentou devolver número de telefone,
-      // força o transbordo e NÃO exibe a mensagem com contatos.
-      const shouldHandoff =
-        AI_HANDOFF_PATTERNS.some((r) => r.test(reply)) || containsPhoneNumber(reply);
-
-      if (shouldHandoff) {
-        requestHandoff(baseHistory, "ia_nao_soube_responder", trimmed);
-      } else {
-        const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: reply };
-        setMessages([...baseHistory, aiMsg]);
-      }
+      const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: reply };
+      setMessages([...baseHistory, aiMsg]);
     } catch (err) {
       console.error(err);
       toast.error("Não consegui responder agora. Tente novamente em instantes.");
