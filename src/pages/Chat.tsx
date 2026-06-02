@@ -306,13 +306,7 @@ const Chat = () => {
       textareaRef.current.style.height = "auto";
     }
 
-    // 1) Transbordo solicitado pelo usuário (tolerante a erros de digitação)
-    if (isHandoffRequest(trimmed)) {
-      requestHandoff(baseHistory, "solicitado_pelo_usuario", trimmed);
-      return;
-    }
-
-    // 2) Notícias / editais / atualizações — consulta a tabela `noticias` em tempo real
+    // Notícias / editais / atualizações — consulta a tabela `noticias` em tempo real
     if (isNewsRequest(trimmed)) {
       setLoading(true);
       try {
