@@ -12,7 +12,7 @@ export const PrevMascot = ({ size = 80, className = "" }: PrevMascotProps) => (
     alt="Prevnildo — assistente virtual do Agros"
     width={size}
     height={size}
-    className={`rounded-full object-cover object-top bg-white ${className}`}
+    className={`rounded-full object-cover object-[50%_20%] bg-gray-100 ${className}`}
     style={{ width: size, height: size }}
   />
 );
