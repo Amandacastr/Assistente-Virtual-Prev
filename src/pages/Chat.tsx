@@ -306,13 +306,7 @@ const Chat = () => {
       textareaRef.current.style.height = "auto";
     }
 
-    // 1) Transbordo solicitado pelo usuário (tolerante a erros de digitação)
-    if (isHandoffRequest(trimmed)) {
-      requestHandoff(baseHistory, "solicitado_pelo_usuario", trimmed);
-      return;
-    }
-
-    // 2) Notícias / editais / atualizações — consulta a tabela `noticias` em tempo real
+    // Notícias / editais / atualizações — consulta a tabela `noticias` em tempo real
     if (isNewsRequest(trimmed)) {
       setLoading(true);
       try {
@@ -352,17 +346,8 @@ const Chat = () => {
       const reply = (data as { response?: string; error?: string })?.response;
       if (!reply) throw new Error((data as any)?.error || "Resposta inválida");
 
-      // Se a IA não soube responder OU tentou devolver número de telefone,
-      // força o transbordo e NÃO exibe a mensagem com contatos.
-      const shouldHandoff =
-        AI_HANDOFF_PATTERNS.some((r) => r.test(reply)) || containsPhoneNumber(reply);
-
-      if (shouldHandoff) {
-        requestHandoff(baseHistory, "ia_nao_soube_responder", trimmed);
-      } else {
-        const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: reply };
-        setMessages([...baseHistory, aiMsg]);
-      }
+      const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: reply };
+      setMessages([...baseHistory, aiMsg]);
     } catch (err) {
       console.error(err);
       toast.error("Não consegui responder agora. Tente novamente em instantes.");
@@ -495,12 +480,23 @@ const Chat = () => {
             <Send className="h-4 w-4" />
           </button>
         </div>
-        <p className="mx-auto mt-1.5 max-w-2xl text-[10.5px] text-muted-foreground">
-          Respostas geradas por IA. Em caso de dúvida, ligue{" "}
-          <a href="tel:3138996550" className="underline underline-offset-2 hover:text-primary transition">
-            (31) 3899-6550
-          </a>.
-        </p>
+        <div className="mx-auto mt-2 flex max-w-2xl items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() =>
+              requestHandoff(messages, "solicitado_pelo_usuario", "Usuário solicitou falar com atendente.")
+            }
+            className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-[11.5px] font-medium text-primary hover:bg-primary/10 transition"
+          >
+            Falar com atendente
+          </button>
+          <p className="text-[10.5px] text-muted-foreground">
+            Respostas geradas por IA. Em caso de dúvida, ligue{" "}
+            <a href="tel:3138996550" className="underline underline-offset-2 hover:text-primary transition">
+              (31) 3899-6550
+            </a>.
+          </p>
+        </div>
       </form>
 
       {/* ── Modal de coleta para transbordo ── */}
