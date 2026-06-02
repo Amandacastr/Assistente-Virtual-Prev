@@ -46,7 +46,7 @@ const Index = () => {
         </div>
 
         <h1 className="font-display text-white text-center text-balance text-5xl md:text-6xl font-semibold leading-tight max-w-xl">
-          Olá! Eu sou a <em className="text-accent not-italic relative">Prev</em>
+          Olá! Eu sou o <em className="text-accent not-italic relative">Prevnildo</em>
         </h1>
         <p className="mt-3 text-center text-white/55 max-w-md text-[15px] font-light leading-relaxed">
           Tire suas dúvidas sobre os planos de previdência do Agros.
