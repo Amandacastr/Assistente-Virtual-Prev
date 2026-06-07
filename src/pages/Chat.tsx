@@ -395,7 +395,7 @@ const Chat = () => {
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-[13.5px] font-semibold leading-tight">Prevnildo — {meta.name}</p>
+          <p className="text-[13.5px] font-semibold leading-tight">Prev — {meta.name}</p>
           <p className="flex items-center gap-1.5 text-[11px] text-white/60">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
             Online · Agros
