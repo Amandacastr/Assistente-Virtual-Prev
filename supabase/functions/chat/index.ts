@@ -436,44 +436,47 @@ Perfil do VidaPrev (dados base dez/2023):
 
 
 const CONHECIMENTO_OUTROS = `
-=== OUTROS ASSUNTOS — ÁREAS DE APOIO DO AGROS ===
-Este contexto cobre demandas administrativas gerais: plano de saúde, emissão de boletos,
-mensalidades, segunda via, atualização cadastral, notícias e comunicados.
+=== BASE DE CONHECIMENTO — SAÚDE (AGROS) ===
+Esta é a ÚNICA base autorizada para responder dúvidas na aba "Outros Assuntos".
+Responda EXCLUSIVAMENTE com as informações abaixo. Se a dúvida não estiver coberta
+por este texto, NÃO invente: informe que você é uma IA em treinamento e oriente o
+usuário a ligar para (31) 3899-6550.
 
---- PLANO DE SAÚDE AGROS ---
-- O Agros é operadora de plano de saúde desde 1994.
-- Os planos de saúde são oferecidos exclusivamente aos grupos familiares dos participantes
-  dos Planos Previdenciários vinculados às Patrocinadoras de Saúde.
-- Para manter o plano de saúde é obrigatório estar vinculado a um plano de previdência
-  do Agros (InvestPrev ou VidaPrev). Se o vínculo previdenciário cessar, o plano de saúde
-  é cancelado automaticamente.
-- Dúvidas operacionais (rede credenciada, autorizações, reembolsos, carteirinha) devem ser
-  tratadas diretamente com a equipe do Agros pelos canais oficiais.
+--- TELEFONES ---
+- Atendimento: (31) 3899-6550 — dias úteis, das 7h às 19h.
+- Emergências / Sobreaviso: (31) 3899-6560.
 
---- BOLETOS E MENSALIDADES ---
-- Vencimento padrão: até o 5º dia útil do mês.
-- Atraso gera multa de 2% sobre o valor da contribuição/mensalidade.
-- Segunda via de boleto e demonstrativos: pelo Autoatendimento em www.agros.org.br
-  (Autoatendimento → login e senha).
-- Demonstrativo de pagamento / contracheque: Autoatendimento → Demonstrativo de
-  Pagamento → Emitir → escolher ano e mês.
+--- AGROS + SAÚDE (CLÍNICA) ---
+- Localização: Centro de Viçosa.
+- Agendamento via WhatsApp: (27) 99574-7436 ou (31) 2117-6847.
+- Oferece consultas eletivas isentas de coparticipação até setembro/2024.
+- NÃO atende urgências.
 
---- NOTÍCIAS E COMUNICADOS ---
-- Página oficial de notícias: https://www.agros.org.br/noticias
-- FAQ / Perguntas frequentes: https://www.agros.org.br/faq
-- Sempre que o usuário perguntar sobre prazos recentes, cobranças do mês atual, comunicados
-  novos ou imprevistos operacionais, use a ferramenta fetch_url para consultar essas páginas
-  antes de responder.
+--- COPARTICIPAÇÃO ---
+- 35% para consultas, terapias (psicologia, nutrição) e exames na rede credenciada.
+- Exames: coparticipação limitada a R$ 132,00.
 
---- ATENDIMENTO HUMANO ---
-- Telefone / WhatsApp: (31) 3899-6550
-- Site: www.agros.org.br
-- Instagram: @agrosprevsaude
+--- REEMBOLSO ---
+- O Agros reembolsa 65% do valor da tabela do Agros para procedimentos realizados
+  fora da rede credenciada.
+
+--- PRAZOS DE LIBERAÇÃO ---
+- Urgências: imediatas.
+- Consultas básicas: até 7 dias úteis.
+- Cirurgias eletivas: até 21 dias úteis.
+
+--- AUDITORIA E AUTORIZAÇÕES ---
+- Pedidos devem ser enviados para: autorizacao@agros.org.br
+
+--- DIVISÃO DE SAÚDE UFV ---
+- Agendamento exclusivo por telefone: (31) 3612-1850.
+- O Agros isenta a coparticipação de 35% de consultas e terapias realizadas lá.
+- Para exames laboratoriais realizados na Divisão de Saúde UFV, a coparticipação é cobrada normalmente.
 `;
 
 const BASE_INVESTPREV = `${CONHECIMENTO_INVESTPREV}\n\n${CONHECIMENTO_IR}`;
 const BASE_VIDAPREV = `${CONHECIMENTO_VIDAPREV}\n\n${CONHECIMENTO_CARTILHA_VIDAPREV}\n\n${CONHECIMENTO_IR}\n\n${CONHECIMENTO_POLITICA}`;
-const BASE_OUTROS = `${CONHECIMENTO_OUTROS}\n\n${CONHECIMENTO_INVESTPREV}\n\n${CONHECIMENTO_VIDAPREV}\n\n${CONHECIMENTO_IR}`;
+const BASE_OUTROS = CONHECIMENTO_OUTROS;
 
 type Contexto = "invest" | "vida" | "outros";
 
@@ -490,12 +493,11 @@ LIMITE ESTRITO: responda APENAS sobre o regulamento, contribuições, benefício
 Se o usuário perguntar sobre InvestPrev, plano de saúde, boletos ou outros assuntos, responda com educação:
 "Como estamos na aba do VidaPrev, meu foco é este plano. Para dúvidas de [InvestPrev / Saúde / Outros Assuntos], por favor, retorne à tela inicial e escolha o cartão correspondente."`;
   }
-  return `CONTEXTO ATUAL: Outros Assuntos (o usuário entrou pelo cartão Outros Assuntos).
-ESCOPO: você é universal aqui. Responda sobre plano de saúde, boletos, mensalidades, notícias e demandas administrativas usando a base e a ferramenta fetch_url quando necessário (FAQ e Notícias do Agros).
-EXCEÇÃO IMPORTANTE: se o usuário perguntar sobre InvestPrev ou VidaPrev, NÃO o mande mudar de aba. Consulte a base de previdência, responda perfeitamente a dúvida e adicione ao final, em itálico, a nota sutil:
-"_(Dica: temos cartões específicos para o seu plano na tela inicial para consultas mais rápidas!)_"
-TRANSBORDO: se, após consultar a base e as páginas do Agros, você não tiver certeza da resposta, peça desculpas, informe que é uma IA em treinamento e diga literalmente:
-"Vou transferir você agora mesmo para a nossa equipe de atendimento humano continuar de onde paramos, por favor, aguarde um instante." — em seguida, informe o telefone (31) 3899-6550.`;
+  return `CONTEXTO ATUAL: Outros Assuntos — DÚVIDAS DE SAÚDE (o usuário entrou pelo cartão Outros Assuntos).
+ESCOPO ESTRITO: responda EXCLUSIVAMENTE com base no texto da "BASE DE CONHECIMENTO — SAÚDE" fornecido abaixo. NÃO use conhecimento externo, NÃO invente valores, prazos, telefones, e-mails ou regras que não estejam literalmente nessa base.
+NÃO responda dúvidas sobre InvestPrev, VidaPrev, IR, boletos, mensalidades ou previdência nesta aba — para esses temas, peça ao usuário que volte à tela inicial e escolha o cartão correto.
+SE A DÚVIDA NÃO ESTIVER COBERTA pela base de saúde acima: diga, com gentileza, que você é a Prev, uma IA ainda em treinamento, e que para essa dúvida específica o ideal é ligar para o atendimento (31) 3899-6550 (dias úteis, 7h às 19h). NÃO tente adivinhar a resposta.
+NÃO use a ferramenta fetch_url nesta aba.`;
 }
 
 function montarPrompt(ctx: Contexto): string {
