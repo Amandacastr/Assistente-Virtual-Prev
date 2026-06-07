@@ -19,7 +19,7 @@ const PLAN_META: Record<Plan, { name: string; intro: string; suggestions: string
   invest: {
     name: "InvestPrev",
     intro:
-      "Olá! Sou o Prevnildo, assistente do Agros para o **InvestPrev**. Como posso te ajudar hoje?",
+      "Olá! Sou a Prev, assistente do Agros para o **InvestPrev**. Como posso te ajudar hoje?",
     suggestions: [
       "Qual o valor mínimo de contribuição?",
       "Quais as vantagens do InvestPrev?",
@@ -30,7 +30,7 @@ const PLAN_META: Record<Plan, { name: string; intro: string; suggestions: string
   vida: {
     name: "VidaPrev",
     intro:
-      "Olá! Sou o Prevnildo, assistente do Agros para o **VidaPrev**. Como posso te ajudar hoje?",
+      "Olá! Sou a Prev, assistente do Agros para o **VidaPrev**. Como posso te ajudar hoje?",
     suggestions: [
       "O que é o VidaPrev?",
       "Como é calculado o benefício de renda mensal?",
@@ -41,7 +41,7 @@ const PLAN_META: Record<Plan, { name: string; intro: string; suggestions: string
   outros: {
     name: "Outros Assuntos",
     intro:
-      "Olá! Sou o Prevnildo, assistente do Agros. Aqui posso te ajudar com **plano de saúde, boletos, mensalidades, notícias e demandas administrativas**. Como posso ajudar?",
+      "Olá! Sou a Prev, assistente do Agros. Aqui posso te ajudar com **plano de saúde, boletos, mensalidades, notícias e demandas administrativas**. Como posso ajudar?",
     suggestions: [
       "Como faço para emitir um boleto?",
       "Qual o prazo de pagamento da mensalidade?",
