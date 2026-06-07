@@ -43,10 +43,10 @@ const PLAN_META: Record<Plan, { name: string; intro: string; suggestions: string
     intro:
       "Olá! Sou a Prev, assistente do Agros. Aqui posso te ajudar com **plano de saúde, boletos, mensalidades, notícias e demandas administrativas**. Como posso ajudar?",
     suggestions: [
-      "Como faço para emitir um boleto?",
-      "Qual o prazo de pagamento da mensalidade?",
-      "Como acesso o plano de saúde?",
-      "Quais as últimas notícias do Agros?",
+      "Qual o valor da coparticipação?",
+      "Como funciona o reembolso?",
+      "Qual o telefone de emergência?",
+      "Como agendar no Agros + Saúde?",
     ],
   },
 };
@@ -484,15 +484,17 @@ const Chat = () => {
           </button>
         </div>
         <div className="mx-auto mt-2 flex max-w-2xl items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={() =>
-              requestHandoff(messages, "solicitado_pelo_usuario", "Usuário solicitou falar com atendente.")
-            }
-            className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-[11.5px] font-medium text-primary hover:bg-primary/10 transition"
-          >
-            Falar com atendente
-          </button>
+          {plan !== "outros" && (
+            <button
+              type="button"
+              onClick={() =>
+                requestHandoff(messages, "solicitado_pelo_usuario", "Usuário solicitou falar com atendente.")
+              }
+              className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-[11.5px] font-medium text-primary hover:bg-primary/10 transition"
+            >
+              Falar com atendente
+            </button>
+          )}
           <p className="text-[10.5px] text-muted-foreground">
             Respostas geradas por IA. Em caso de dúvida, ligue{" "}
             <a href="tel:3138996550" className="underline underline-offset-2 hover:text-primary transition">
