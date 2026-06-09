@@ -793,6 +793,14 @@ Deno.serve(async (req) => {
       break;
     }
 
+    // Garante que links Markdown [texto](url) não tenham quebras/espaços extras
+    // dentro dos colchetes ou parênteses — assim renderizam como links clicáveis.
+    textoResposta = textoResposta.replace(
+      /\[([\s\S]*?)\]\(([\s\S]*?)\)/g,
+      (_m, txt: string, url: string) =>
+        `[${txt.replace(/\s+/g, " ").trim()}](${url.replace(/\s+/g, "")})`,
+    );
+
     historico.push({ role: "assistant", content: textoResposta });
     conversationStore.set(chave, historico);
 
