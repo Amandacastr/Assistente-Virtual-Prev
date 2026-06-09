@@ -710,8 +710,12 @@ Deno.serve(async (req) => {
     // Mantém últimas trocas (preserva pares tool-call/tool-response)
     const ultimas = historico.slice(-20);
 
+    // RAG: busca trechos dos PDFs do bucket base_documentos com base na pergunta atual.
+    const retrieved = await retrieveDocs(mensagem, 6);
+    const trechosRag = formatRetrieved(retrieved);
+
     const mensagensIA: Array<Record<string, unknown>> = [
-      { role: "system", content: montarPrompt(ctx) },
+      { role: "system", content: montarPrompt(ctx, trechosRag) },
       ...ultimas.map((m) => ({ ...m })),
     ];
 
