@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      document_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          embedding: string
+          id: string
+          page: number | null
+          source: string
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string
+          embedding: string
+          id?: string
+          page?: number | null
+          source: string
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          embedding?: string
+          id?: string
+          page?: number | null
+          source?: string
+        }
+        Relationships: []
+      }
       noticias: {
         Row: {
           created_at: string
@@ -40,7 +70,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_document_chunks: {
+        Args: { match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          id: string
+          page: number
+          similarity: number
+          source: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
