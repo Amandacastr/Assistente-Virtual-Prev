@@ -12,6 +12,67 @@ const corsHeaders = {
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 
+// ---- RAG (Supabase pgvector + Lovable AI embeddings) ----
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
+const EMBED_MODEL = "openai/text-embedding-3-small"; // 1536 dims, matches DB
+
+async function embedQuery(text: string): Promise<number[] | null> {
+  if (!LOVABLE_API_KEY) return null;
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Lovable-API-Key": LOVABLE_API_KEY },
+      body: JSON.stringify({ model: EMBED_MODEL, input: text }),
+    });
+    if (!res.ok) {
+      console.error("embed err", res.status, await res.text());
+      return null;
+    }
+    const json = await res.json();
+    return json?.data?.[0]?.embedding ?? null;
+  } catch (e) {
+    console.error("embed fail", e);
+    return null;
+  }
+}
+
+async function retrieveDocs(query: string, k = 6): Promise<Array<{ source: string; page: number | null; content: string; similarity: number }>> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return [];
+  const vec = await embedQuery(query);
+  if (!vec) return [];
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/match_document_chunks`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify({ query_embedding: vec, match_count: k }),
+    });
+    if (!res.ok) {
+      console.error("rpc err", res.status, await res.text());
+      return [];
+    }
+    const rows = (await res.json()) as Array<any>;
+    return rows
+      .filter((r) => typeof r?.similarity === "number" && r.similarity > 0.25)
+      .map((r) => ({ source: r.source, page: r.page, content: r.content, similarity: r.similarity }));
+  } catch (e) {
+    console.error("retrieve fail", e);
+    return [];
+  }
+}
+
+function formatRetrieved(docs: Array<{ source: string; page: number | null; content: string }>): string {
+  if (!docs.length) return "";
+  return docs
+    .map((d, i) => `[Trecho ${i + 1} — ${d.source}${d.page ? `, p.${d.page}` : ""}]\n${d.content}`)
+    .join("\n\n");
+}
+
 // =============================================================
 // BASES DE CONHECIMENTO (extraídas literalmente do app.py)
 // =============================================================
