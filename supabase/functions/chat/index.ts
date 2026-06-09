@@ -12,6 +12,67 @@ const corsHeaders = {
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 
+// ---- RAG (Supabase pgvector + Lovable AI embeddings) ----
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
+const EMBED_MODEL = "openai/text-embedding-3-small"; // 1536 dims, matches DB
+
+async function embedQuery(text: string): Promise<number[] | null> {
+  if (!LOVABLE_API_KEY) return null;
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Lovable-API-Key": LOVABLE_API_KEY },
+      body: JSON.stringify({ model: EMBED_MODEL, input: text }),
+    });
+    if (!res.ok) {
+      console.error("embed err", res.status, await res.text());
+      return null;
+    }
+    const json = await res.json();
+    return json?.data?.[0]?.embedding ?? null;
+  } catch (e) {
+    console.error("embed fail", e);
+    return null;
+  }
+}
+
+async function retrieveDocs(query: string, k = 6): Promise<Array<{ source: string; page: number | null; content: string; similarity: number }>> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return [];
+  const vec = await embedQuery(query);
+  if (!vec) return [];
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/match_document_chunks`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify({ query_embedding: vec, match_count: k }),
+    });
+    if (!res.ok) {
+      console.error("rpc err", res.status, await res.text());
+      return [];
+    }
+    const rows = (await res.json()) as Array<any>;
+    return rows
+      .filter((r) => typeof r?.similarity === "number" && r.similarity > 0.25)
+      .map((r) => ({ source: r.source, page: r.page, content: r.content, similarity: r.similarity }));
+  } catch (e) {
+    console.error("retrieve fail", e);
+    return [];
+  }
+}
+
+function formatRetrieved(docs: Array<{ source: string; page: number | null; content: string }>): string {
+  if (!docs.length) return "";
+  return docs
+    .map((d, i) => `[Trecho ${i + 1} — ${d.source}${d.page ? `, p.${d.page}` : ""}]\n${d.content}`)
+    .join("\n\n");
+}
+
 // =============================================================
 // BASES DE CONHECIMENTO (extraídas literalmente do app.py)
 // =============================================================
@@ -500,9 +561,16 @@ SE A DÚVIDA NÃO ESTIVER COBERTA pela base de saúde acima: diga, com gentileza
 NÃO use a ferramenta fetch_url nesta aba.`;
 }
 
-function montarPrompt(ctx: Contexto): string {
+function montarPrompt(ctx: Contexto, trechosRag = ""): string {
   const base = ctx === "vida" ? BASE_VIDAPREV : ctx === "outros" ? BASE_OUTROS : BASE_INVESTPREV;
   const nomeCtx = ctx === "vida" ? "VidaPrev" : ctx === "outros" ? "Outros Assuntos" : "InvestPrev";
+
+  const blocoRag = trechosRag
+    ? `\n\nBASE DE CONHECIMENTO DINÂMICA (PDFs OFICIAIS DO AGROS — BUCKET base_documentos):
+Use PRIORITARIAMENTE os trechos abaixo como fonte da verdade. Se houver conflito entre a base estática e os PDFs, prevalecem os PDFs. Cite o documento de origem entre parênteses quando relevante.
+
+${trechosRag}\n`
+    : "";
 
   return `Você é a Prev, assistente virtual do Agros.
 
@@ -516,8 +584,13 @@ ESTILO DE RESPOSTA (OBRIGATÓRIO):
 - Use linguagem simples, frases curtas. Negrito apenas em números/prazos-chave.
 - Quando citar regra, mencione o artigo entre parênteses: "(Art. X)".
 - Se a pergunta for vaga, faça UMA pergunta curta de esclarecimento.
-- NUNCA invente. Use somente a base abaixo e, quando autorizado, a ferramenta fetch_url.
+- NUNCA invente. Use somente a base abaixo, os trechos dinâmicos dos PDFs e, quando autorizado, a ferramenta fetch_url.
 - Só cite o telefone (31) 3899-6550 quando realmente precisar de atendimento humano.
+
+FORMATAÇÃO DE LINKS (CRÍTICO — NUNCA QUEBRE ESTA REGRA):
+- Sempre que escrever um link em Markdown no formato [texto](url), o "texto" entre colchetes [ ] DEVE estar em uma única linha, sem quebras de linha (\\n) e sem espaços em branco no começo ou no fim.
+- Antes de devolver a resposta, releia cada [ ... ]( ... ) e remova qualquer \\n, \\r, tab ou espaço extra de dentro dos colchetes para garantir que o link renderize como um link azul clicável.
+- A URL dentro dos parênteses também deve ficar em uma única linha, sem espaços.
 
 TRATAMENTO DE LINGUAGEM E ERROS DE DIGITAÇÃO (CRÍTICO):
 - O público é diverso em idade e familiaridade com tecnologia. Seja EXTREMAMENTE TOLERANTE a erros de digitação, ortografia, gramática, falta de acentuação e abreviações informais (ex.: "vc", "tbm", "q", "pq", "tb", "obg", "blz", "invest previ", "vida preve", "previdencia", "aposentadoria compl").
@@ -534,8 +607,8 @@ CONTATOS DO AGROS:
 - Site: www.agros.org.br
 - Instagram: @agrosprevsaude
 
-BASE DE CONHECIMENTO — ${nomeCtx.toUpperCase()}:
-${base}`.trim();
+BASE DE CONHECIMENTO ESTÁTICA — ${nomeCtx.toUpperCase()}:
+${base}${blocoRag}`.trim();
 }
 
 // Histórico em memória por (user_id + contexto). Reinicia a cada cold start.
@@ -637,8 +710,12 @@ Deno.serve(async (req) => {
     // Mantém últimas trocas (preserva pares tool-call/tool-response)
     const ultimas = historico.slice(-20);
 
+    // RAG: busca trechos dos PDFs do bucket base_documentos com base na pergunta atual.
+    const retrieved = await retrieveDocs(mensagem, 6);
+    const trechosRag = formatRetrieved(retrieved);
+
     const mensagensIA: Array<Record<string, unknown>> = [
-      { role: "system", content: montarPrompt(ctx) },
+      { role: "system", content: montarPrompt(ctx, trechosRag) },
       ...ultimas.map((m) => ({ ...m })),
     ];
 
@@ -715,6 +792,14 @@ Deno.serve(async (req) => {
       textoResposta = msg?.content ?? "";
       break;
     }
+
+    // Garante que links Markdown [texto](url) não tenham quebras/espaços extras
+    // dentro dos colchetes ou parênteses — assim renderizam como links clicáveis.
+    textoResposta = textoResposta.replace(
+      /\[([\s\S]*?)\]\(([\s\S]*?)\)/g,
+      (_m, txt: string, url: string) =>
+        `[${txt.replace(/\s+/g, " ").trim()}](${url.replace(/\s+/g, "")})`,
+    );
 
     historico.push({ role: "assistant", content: textoResposta });
     conversationStore.set(chave, historico);
