@@ -561,9 +561,16 @@ SE A DÚVIDA NÃO ESTIVER COBERTA pela base de saúde acima: diga, com gentileza
 NÃO use a ferramenta fetch_url nesta aba.`;
 }
 
-function montarPrompt(ctx: Contexto): string {
+function montarPrompt(ctx: Contexto, trechosRag = ""): string {
   const base = ctx === "vida" ? BASE_VIDAPREV : ctx === "outros" ? BASE_OUTROS : BASE_INVESTPREV;
   const nomeCtx = ctx === "vida" ? "VidaPrev" : ctx === "outros" ? "Outros Assuntos" : "InvestPrev";
+
+  const blocoRag = trechosRag
+    ? `\n\nBASE DE CONHECIMENTO DINÂMICA (PDFs OFICIAIS DO AGROS — BUCKET base_documentos):
+Use PRIORITARIAMENTE os trechos abaixo como fonte da verdade. Se houver conflito entre a base estática e os PDFs, prevalecem os PDFs. Cite o documento de origem entre parênteses quando relevante.
+
+${trechosRag}\n`
+    : "";
 
   return `Você é a Prev, assistente virtual do Agros.
 
@@ -577,8 +584,13 @@ ESTILO DE RESPOSTA (OBRIGATÓRIO):
 - Use linguagem simples, frases curtas. Negrito apenas em números/prazos-chave.
 - Quando citar regra, mencione o artigo entre parênteses: "(Art. X)".
 - Se a pergunta for vaga, faça UMA pergunta curta de esclarecimento.
-- NUNCA invente. Use somente a base abaixo e, quando autorizado, a ferramenta fetch_url.
+- NUNCA invente. Use somente a base abaixo, os trechos dinâmicos dos PDFs e, quando autorizado, a ferramenta fetch_url.
 - Só cite o telefone (31) 3899-6550 quando realmente precisar de atendimento humano.
+
+FORMATAÇÃO DE LINKS (CRÍTICO — NUNCA QUEBRE ESTA REGRA):
+- Sempre que escrever um link em Markdown no formato [texto](url), o "texto" entre colchetes [ ] DEVE estar em uma única linha, sem quebras de linha (\\n) e sem espaços em branco no começo ou no fim.
+- Antes de devolver a resposta, releia cada [ ... ]( ... ) e remova qualquer \\n, \\r, tab ou espaço extra de dentro dos colchetes para garantir que o link renderize como um link azul clicável.
+- A URL dentro dos parênteses também deve ficar em uma única linha, sem espaços.
 
 TRATAMENTO DE LINGUAGEM E ERROS DE DIGITAÇÃO (CRÍTICO):
 - O público é diverso em idade e familiaridade com tecnologia. Seja EXTREMAMENTE TOLERANTE a erros de digitação, ortografia, gramática, falta de acentuação e abreviações informais (ex.: "vc", "tbm", "q", "pq", "tb", "obg", "blz", "invest previ", "vida preve", "previdencia", "aposentadoria compl").
@@ -595,8 +607,8 @@ CONTATOS DO AGROS:
 - Site: www.agros.org.br
 - Instagram: @agrosprevsaude
 
-BASE DE CONHECIMENTO — ${nomeCtx.toUpperCase()}:
-${base}`.trim();
+BASE DE CONHECIMENTO ESTÁTICA — ${nomeCtx.toUpperCase()}:
+${base}${blocoRag}`.trim();
 }
 
 // Histórico em memória por (user_id + contexto). Reinicia a cada cold start.
