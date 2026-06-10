@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, ShieldCheck, TrendingUp, Shield, Phone, Globe, Instagram, MessagesSquare } from "lucide-react";
+import { ArrowRight, ShieldCheck, TrendingUp, Shield, Phone, Globe, Instagram, MessagesSquare, HeartPulse, FileText } from "lucide-react";
 import { PrevMascot } from "@/components/PrevMascot";
 import { AgrosLogo } from "@/components/AgrosLogo";
 
@@ -57,7 +57,6 @@ const Index = () => {
         </p>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full max-w-5xl items-stretch">
-          {/* InvestPrev — botão com indicador de ação */}
           <PlanCard
             to="/chat/invest"
             tag="Aberto a novas adesões"
@@ -68,31 +67,48 @@ const Index = () => {
             cta="Conversar sobre InvestPrev"
             ctaTone="blue"
           />
-          {/* VidaPrev — tag exclusivo, ícone escudo */}
           <PlanCard
             to="/chat/vida"
             tag="Plano exclusivo"
             tagTone="gold"
             icon={<Shield className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />}
             title="VidaPrev"
-            desc="Plano exclusivo para participantes transferidos pelo Termo de Conciliação de 2021. Tire dúvidas sobre benefício, resgate e IR."
+            desc="Plano exclusivo para participantes transferidos do antigo Plano B. Tire dúvidas sobre benefício, resgate e tributação."
             cta="Conversar sobre VidaPrev"
             ctaTone="gold"
           />
-          {/* Outros Assuntos — saúde, boletos, notícias e admin */}
-          <div className="sm:col-span-2 lg:col-span-1 sm:max-w-md sm:mx-auto sm:w-full lg:max-w-none">
-            <PlanCard
-              to="/chat/outros"
-              tag="Demais demandas"
-              tagTone="green"
-              icon={<MessagesSquare className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-300" />}
-              title="Outros Assuntos"
-              desc="Tire suas dúvidas sobre plano de saúde, emissão de boletos, mensalidades, notícias e demandas administrativas gerais do Agros."
-              cta="Conversar sobre Outros Assuntos"
-              ctaTone="green"
-            />
-          </div>
+          <PlanCard
+            to="/chat/saude"
+            tag="Saúde Agros"
+            tagTone="rose"
+            icon={<HeartPulse className="h-5 w-5 sm:h-6 sm:w-6 text-rose-300" />}
+            title="Saúde"
+            desc="Tire suas dúvidas sobre os planos Agros Mais Saúde e PAS-UFV, rede credenciada, coparticipação, coberturas e Espaço Agros + Saúde."
+            cta="Conversar sobre Saúde"
+            ctaTone="rose"
+          />
+          <PlanCard
+            to="/chat/planoa"
+            tag="Fechado para novas adesões"
+            tagTone="violet"
+            icon={<FileText className="h-5 w-5 sm:h-6 sm:w-6 text-violet-300" />}
+            title="Plano A"
+            desc="Plano previdenciário na modalidade de Benefício Definido (CLT), fechado para novas adesões. Tire suas dúvidas sobre o regulamento."
+            cta="Conversar sobre Plano A"
+            ctaTone="violet"
+          />
+          <PlanCard
+            to="/chat/outros"
+            tag="Demais demandas"
+            tagTone="green"
+            icon={<MessagesSquare className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-300" />}
+            title="Outros Assuntos"
+            desc="Tire suas dúvidas sobre emissão de boletos, mensalidades, notícias, Educação Financeira e demandas administrativas gerais do Agros."
+            cta="Conversar sobre Outros Assuntos"
+            ctaTone="green"
+          />
         </div>
+
       </main>
 
       {/* Rodapé — apenas ícones clicáveis */}
@@ -154,37 +170,47 @@ const Index = () => {
   );
 };
 
+type Tone = "blue" | "gold" | "green" | "rose" | "violet";
+
 interface CardProps {
   to: string;
   tag: string;
-  tagTone: "blue" | "gold" | "green";
+  tagTone: Tone;
   icon: React.ReactNode;
   title: string;
   desc: string;
   cta: string;
-  ctaTone: "blue" | "gold" | "green";
+  ctaTone: Tone;
   showArrowPulse?: boolean;
 }
 
+const TAG_CLS: Record<Tone, string> = {
+  blue: "bg-primary-glow/30 text-sky-200 border-sky-300/20",
+  green: "bg-emerald-500/20 text-emerald-200 border-emerald-300/30",
+  gold: "bg-accent/20 text-accent-glow border-accent/30",
+  rose: "bg-rose-500/20 text-rose-200 border-rose-300/30",
+  violet: "bg-violet-500/20 text-violet-200 border-violet-300/30",
+};
+const ICON_WRAP_CLS: Record<Tone, string> = {
+  blue: "bg-sky-700/15 border-sky-600/40",
+  green: "bg-emerald-500/15 border-emerald-400/40",
+  gold: "bg-accent/15 border-accent/30",
+  rose: "bg-rose-500/15 border-rose-400/40",
+  violet: "bg-violet-500/15 border-violet-400/40",
+};
+const BTN_CLS: Record<Tone, string> = {
+  blue: "bg-sky-700 text-white border-2 border-sky-700",
+  green: "bg-emerald-600 text-white border-2 border-emerald-600",
+  gold: "bg-accent/90 text-[hsl(30_40%_8%)] border border-accent",
+  rose: "bg-rose-600 text-white border-2 border-rose-600",
+  violet: "bg-violet-600 text-white border-2 border-violet-600",
+};
+
 const PlanCard = ({ to, tag, tagTone, icon, title, desc, cta, ctaTone, showArrowPulse }: CardProps) => {
-  const tagCls =
-    tagTone === "blue"
-      ? "bg-primary-glow/30 text-sky-200 border-sky-300/20"
-      : tagTone === "green"
-      ? "bg-emerald-500/20 text-emerald-200 border-emerald-300/30"
-      : "bg-accent/20 text-accent-glow border-accent/30";
-  const iconWrapCls =
-    tagTone === "blue"
-      ? "bg-sky-700/15 border-sky-600/40"
-      : tagTone === "green"
-      ? "bg-emerald-500/15 border-emerald-400/40"
-      : "bg-accent/15 border-accent/30";
-  const btnCls =
-    ctaTone === "blue"
-      ? "bg-sky-700 text-white border-2 border-sky-700"
-      : ctaTone === "green"
-      ? "bg-emerald-600 text-white border-2 border-emerald-600"
-      : "bg-accent/90 text-[hsl(30_40%_8%)] border border-accent";
+  const tagCls = TAG_CLS[tagTone];
+  const iconWrapCls = ICON_WRAP_CLS[tagTone];
+  const btnCls = BTN_CLS[ctaTone];
+
 
   return (
     <Link

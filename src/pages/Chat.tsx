@@ -7,7 +7,7 @@ import { PrevMascot } from "@/components/PrevMascot";
 import { AgrosLogo } from "@/components/AgrosLogo";
 import { toast } from "sonner";
 
-type Plan = "invest" | "vida" | "outros";
+type Plan = "invest" | "vida" | "saude" | "planoa" | "outros";
 
 interface Message {
   id: string;
@@ -38,15 +38,37 @@ const PLAN_META: Record<Plan, { name: string; intro: string; suggestions: string
       "O que acontece com o saldo após o falecimento?",
     ],
   },
-  outros: {
-    name: "Outros Assuntos",
+  saude: {
+    name: "Saúde",
     intro:
-      "Olá! Sou a Prev, assistente do Agros. Aqui posso te ajudar com **plano de saúde, boletos, mensalidades, notícias e demandas administrativas**. Como posso ajudar?",
+      "Olá! Sou a Prev. Aqui posso te ajudar com **Agros Mais Saúde, PAS-UFV, rede credenciada, coparticipação, coberturas e Espaço Agros + Saúde**. Como posso ajudar?",
     suggestions: [
       "Qual o valor da coparticipação?",
       "Como funciona o reembolso?",
-      "Qual o telefone de emergência?",
-      "Como agendar no Agros + Saúde?",
+      "Quais hospitais são da rede credenciada?",
+      "Como funciona o Espaço Agros + Saúde?",
+    ],
+  },
+  planoa: {
+    name: "Plano A",
+    intro:
+      "Olá! Sou a Prev, assistente do Agros para o **Plano A** (Benefício Definido — CLT). Como posso te ajudar hoje?",
+    suggestions: [
+      "Como funciona o Plano A?",
+      "O que é a prova de vida?",
+      "Quais são os requisitos para aposentadoria?",
+      "Como é calculado o benefício?",
+    ],
+  },
+  outros: {
+    name: "Outros Assuntos",
+    intro:
+      "Olá! Sou a Prev. Aqui posso te ajudar com **boletos, mensalidades, notícias, Educação Financeira e demandas administrativas gerais do Agros**. Como posso ajudar?",
+    suggestions: [
+      "Como emitir um boleto?",
+      "Onde vejo as últimas notícias?",
+      "Tem material de Educação Financeira?",
+      "Quero falar com um atendente",
     ],
   },
 };
@@ -62,7 +84,8 @@ const getUserId = () => {
 
 const Chat = () => {
   const { plan } = useParams<{ plan: string }>();
-  if (plan !== "invest" && plan !== "vida" && plan !== "outros") return <Navigate to="/" replace />;
+  if (plan !== "invest" && plan !== "vida" && plan !== "saude" && plan !== "planoa" && plan !== "outros") return <Navigate to="/" replace />;
+
 
   const meta = PLAN_META[plan];
   const userId = useMemo(() => getUserId(), []);
@@ -374,7 +397,7 @@ const Chat = () => {
   };
 
   // Cor de acento por plano — classe fixa para o Tailwind não purgar
-  const accentBar = plan === "invest" ? "bg-primary/40" : plan === "vida" ? "bg-accent/40" : "bg-emerald-400/40";
+  const accentBar = plan === "invest" ? "bg-primary/40" : plan === "vida" ? "bg-accent/40" : plan === "saude" ? "bg-rose-400/40" : plan === "planoa" ? "bg-violet-400/40" : "bg-emerald-400/40";
 
   return (
     <div className="flex flex-col h-[100dvh] bg-[hsl(var(--chat-bg))] text-[hsl(var(--chat-text))]">
