@@ -170,37 +170,47 @@ const Index = () => {
   );
 };
 
+type Tone = "blue" | "gold" | "green" | "rose" | "violet";
+
 interface CardProps {
   to: string;
   tag: string;
-  tagTone: "blue" | "gold" | "green";
+  tagTone: Tone;
   icon: React.ReactNode;
   title: string;
   desc: string;
   cta: string;
-  ctaTone: "blue" | "gold" | "green";
+  ctaTone: Tone;
   showArrowPulse?: boolean;
 }
 
+const TAG_CLS: Record<Tone, string> = {
+  blue: "bg-primary-glow/30 text-sky-200 border-sky-300/20",
+  green: "bg-emerald-500/20 text-emerald-200 border-emerald-300/30",
+  gold: "bg-accent/20 text-accent-glow border-accent/30",
+  rose: "bg-rose-500/20 text-rose-200 border-rose-300/30",
+  violet: "bg-violet-500/20 text-violet-200 border-violet-300/30",
+};
+const ICON_WRAP_CLS: Record<Tone, string> = {
+  blue: "bg-sky-700/15 border-sky-600/40",
+  green: "bg-emerald-500/15 border-emerald-400/40",
+  gold: "bg-accent/15 border-accent/30",
+  rose: "bg-rose-500/15 border-rose-400/40",
+  violet: "bg-violet-500/15 border-violet-400/40",
+};
+const BTN_CLS: Record<Tone, string> = {
+  blue: "bg-sky-700 text-white border-2 border-sky-700",
+  green: "bg-emerald-600 text-white border-2 border-emerald-600",
+  gold: "bg-accent/90 text-[hsl(30_40%_8%)] border border-accent",
+  rose: "bg-rose-600 text-white border-2 border-rose-600",
+  violet: "bg-violet-600 text-white border-2 border-violet-600",
+};
+
 const PlanCard = ({ to, tag, tagTone, icon, title, desc, cta, ctaTone, showArrowPulse }: CardProps) => {
-  const tagCls =
-    tagTone === "blue"
-      ? "bg-primary-glow/30 text-sky-200 border-sky-300/20"
-      : tagTone === "green"
-      ? "bg-emerald-500/20 text-emerald-200 border-emerald-300/30"
-      : "bg-accent/20 text-accent-glow border-accent/30";
-  const iconWrapCls =
-    tagTone === "blue"
-      ? "bg-sky-700/15 border-sky-600/40"
-      : tagTone === "green"
-      ? "bg-emerald-500/15 border-emerald-400/40"
-      : "bg-accent/15 border-accent/30";
-  const btnCls =
-    ctaTone === "blue"
-      ? "bg-sky-700 text-white border-2 border-sky-700"
-      : ctaTone === "green"
-      ? "bg-emerald-600 text-white border-2 border-emerald-600"
-      : "bg-accent/90 text-[hsl(30_40%_8%)] border border-accent";
+  const tagCls = TAG_CLS[tagTone];
+  const iconWrapCls = ICON_WRAP_CLS[tagTone];
+  const btnCls = BTN_CLS[ctaTone];
+
 
   return (
     <Link
