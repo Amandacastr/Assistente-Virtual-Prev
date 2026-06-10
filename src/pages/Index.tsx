@@ -57,7 +57,6 @@ const Index = () => {
         </p>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full max-w-5xl items-stretch">
-          {/* InvestPrev — botão com indicador de ação */}
           <PlanCard
             to="/chat/invest"
             tag="Aberto a novas adesões"
@@ -68,31 +67,48 @@ const Index = () => {
             cta="Conversar sobre InvestPrev"
             ctaTone="blue"
           />
-          {/* VidaPrev — tag exclusivo, ícone escudo */}
           <PlanCard
             to="/chat/vida"
             tag="Plano exclusivo"
             tagTone="gold"
             icon={<Shield className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />}
             title="VidaPrev"
-            desc="Plano exclusivo para participantes transferidos pelo Termo de Conciliação de 2021. Tire dúvidas sobre benefício, resgate e IR."
+            desc="Plano exclusivo para participantes transferidos do antigo Plano B. Tire dúvidas sobre benefício, resgate e tributação."
             cta="Conversar sobre VidaPrev"
             ctaTone="gold"
           />
-          {/* Outros Assuntos — saúde, boletos, notícias e admin */}
-          <div className="sm:col-span-2 lg:col-span-1 sm:max-w-md sm:mx-auto sm:w-full lg:max-w-none">
-            <PlanCard
-              to="/chat/outros"
-              tag="Demais demandas"
-              tagTone="green"
-              icon={<MessagesSquare className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-300" />}
-              title="Outros Assuntos"
-              desc="Tire suas dúvidas sobre plano de saúde, emissão de boletos, mensalidades, notícias e demandas administrativas gerais do Agros."
-              cta="Conversar sobre Outros Assuntos"
-              ctaTone="green"
-            />
-          </div>
+          <PlanCard
+            to="/chat/saude"
+            tag="Saúde Agros"
+            tagTone="rose"
+            icon={<HeartPulse className="h-5 w-5 sm:h-6 sm:w-6 text-rose-300" />}
+            title="Saúde"
+            desc="Tire suas dúvidas sobre os planos Agros Mais Saúde e PAS-UFV, rede credenciada, coparticipação, coberturas e Espaço Agros + Saúde."
+            cta="Conversar sobre Saúde"
+            ctaTone="rose"
+          />
+          <PlanCard
+            to="/chat/planoa"
+            tag="Fechado para novas adesões"
+            tagTone="violet"
+            icon={<FileText className="h-5 w-5 sm:h-6 sm:w-6 text-violet-300" />}
+            title="Plano A"
+            desc="Plano previdenciário na modalidade de Benefício Definido (CLT), fechado para novas adesões. Tire suas dúvidas sobre o regulamento."
+            cta="Conversar sobre Plano A"
+            ctaTone="violet"
+          />
+          <PlanCard
+            to="/chat/outros"
+            tag="Demais demandas"
+            tagTone="green"
+            icon={<MessagesSquare className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-300" />}
+            title="Outros Assuntos"
+            desc="Tire suas dúvidas sobre emissão de boletos, mensalidades, notícias, Educação Financeira e demandas administrativas gerais do Agros."
+            cta="Conversar sobre Outros Assuntos"
+            ctaTone="green"
+          />
         </div>
+
       </main>
 
       {/* Rodapé — apenas ícones clicáveis */}
