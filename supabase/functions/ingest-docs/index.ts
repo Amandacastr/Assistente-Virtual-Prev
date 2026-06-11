@@ -45,20 +45,31 @@ function chunkText(text: string, target = 1200, overlap = 200): string[] {
 }
 
 async function embedBatch(inputs: string[], apiKey: string): Promise<number[][]> {
-  const res = await fetch(EMBED_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Lovable-API-Key": apiKey,
-    },
-    body: JSON.stringify({ model: EMBED_MODEL, input: inputs }),
-  });
-  if (!res.ok) {
+  let attempt = 0;
+  // Up to ~6 retries with exponential backoff on 429/5xx
+  while (true) {
+    const res = await fetch(EMBED_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Lovable-API-Key": apiKey,
+      },
+      body: JSON.stringify({ model: EMBED_MODEL, input: inputs }),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return (json.data as Array<{ embedding: number[] }>).map((d) => d.embedding);
+    }
     const t = await res.text();
-    throw new Error(`Embedding failed ${res.status}: ${t}`);
+    const retryable = res.status === 429 || res.status >= 500;
+    if (!retryable || attempt >= 6) {
+      throw new Error(`Embedding failed ${res.status}: ${t}`);
+    }
+    const wait = Math.min(30000, 2000 * Math.pow(2, attempt)) + Math.floor(Math.random() * 500);
+    console.log(`embed ${res.status} — retry ${attempt + 1} in ${wait}ms`);
+    await new Promise((r) => setTimeout(r, wait));
+    attempt++;
   }
-  const json = await res.json();
-  return (json.data as Array<{ embedding: number[] }>).map((d) => d.embedding);
 }
 
 async function listPdfs(supabase: ReturnType<typeof createClient>): Promise<string[]> {
