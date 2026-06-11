@@ -20,18 +20,18 @@ const EMBED_MODEL = "openai/text-embedding-3-small"; // 1536 dims
 
 type Contexto = "invest" | "vida" | "saude" | "planoa" | "outros";
 
-// Prefixos de arquivo por contexto (roteamento de RAG por metadata).
-const PREFIXOS_INCLUIR: Record<Contexto, string[]> = {
+// Substrings (ILIKE / contains) por contexto — o identificador pode aparecer
+// em qualquer parte do nome do arquivo.
+const SUBSTR_INCLUIR: Record<Contexto, string[]> = {
   invest: ["investprev"],
   vida: ["vidaprev"],
   saude: ["saude"],
-  planoa: ["planoa", "prova-de-vida"],
-  outros: ["educacaofinanceira"],
+  planoa: ["planoa", "plano-a", "prova-de-vida"],
+  outros: ["informe", "politica", "rai"],
 };
-// Para "outros" aceitamos também tudo que NÃO se enquadre nos demais.
-const TODOS_PREFIXOS_CONHECIDOS = [
-  "investprev", "vidaprev", "saude", "planoa", "prova-de-vida",
-];
+// Identificadores específicos de plano — usados para "outros" tratar como
+// institucional tudo que NÃO mencione um plano específico.
+const SUBSTR_PLANOS = ["investprev", "vidaprev", "saude", "planoa", "plano-a"];
 
 function filenameOf(source: string): string {
   const parts = source.split("/");
@@ -41,10 +41,12 @@ function filenameOf(source: string): string {
 function chunkMatchesContext(source: string, ctx: Contexto): boolean {
   const name = filenameOf(source);
   if (ctx === "outros") {
-    if (name.startsWith("educacaofinanceira")) return true;
-    return !TODOS_PREFIXOS_CONHECIDOS.some((p) => name.startsWith(p));
+    // 1) Qualquer arquivo que contenha informe/politica/rai
+    if (SUBSTR_INCLUIR.outros.some((s) => name.includes(s))) return true;
+    // 2) Arquivos institucionais gerais (não pertencem a nenhum plano)
+    return !SUBSTR_PLANOS.some((s) => name.includes(s));
   }
-  return PREFIXOS_INCLUIR[ctx].some((p) => name.startsWith(p));
+  return SUBSTR_INCLUIR[ctx].some((s) => name.includes(s));
 }
 
 async function embedQuery(text: string): Promise<number[] | null> {
