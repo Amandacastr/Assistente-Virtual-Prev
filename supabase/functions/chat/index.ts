@@ -163,9 +163,7 @@ ${trechosRag}\n`
 - Se houver links e imagens associados ao tema, agrupe-os e entregue-os organizados no FINAL da resposta.\n`
     : "";
 
-  return `Você é a Prev, assistente virtual do Agros.
-
-${regrasPorContexto(ctx)}
+  return `${regrasPorContexto(ctx)}
 
 COMPLETUDE E CONTEXTO (OBRIGATÓRIO):
 - Suas respostas NÃO devem ser curtas demais (monossilábicas) e nem extensas sem necessidade.
