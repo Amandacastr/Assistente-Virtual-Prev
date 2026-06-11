@@ -20,18 +20,18 @@ const EMBED_MODEL = "openai/text-embedding-3-small"; // 1536 dims
 
 type Contexto = "invest" | "vida" | "saude" | "planoa" | "outros";
 
-// Prefixos de arquivo por contexto (roteamento de RAG por metadata).
-const PREFIXOS_INCLUIR: Record<Contexto, string[]> = {
+// Substrings (ILIKE / contains) por contexto — o identificador pode aparecer
+// em qualquer parte do nome do arquivo.
+const SUBSTR_INCLUIR: Record<Contexto, string[]> = {
   invest: ["investprev"],
   vida: ["vidaprev"],
   saude: ["saude"],
-  planoa: ["planoa", "prova-de-vida"],
-  outros: ["educacaofinanceira"],
+  planoa: ["planoa", "plano-a", "prova-de-vida"],
+  outros: ["informe", "politica", "rai"],
 };
-// Para "outros" aceitamos também tudo que NÃO se enquadre nos demais.
-const TODOS_PREFIXOS_CONHECIDOS = [
-  "investprev", "vidaprev", "saude", "planoa", "prova-de-vida",
-];
+// Identificadores específicos de plano — usados para "outros" tratar como
+// institucional tudo que NÃO mencione um plano específico.
+const SUBSTR_PLANOS = ["investprev", "vidaprev", "saude", "planoa", "plano-a"];
 
 function filenameOf(source: string): string {
   const parts = source.split("/");
@@ -41,10 +41,12 @@ function filenameOf(source: string): string {
 function chunkMatchesContext(source: string, ctx: Contexto): boolean {
   const name = filenameOf(source);
   if (ctx === "outros") {
-    if (name.startsWith("educacaofinanceira")) return true;
-    return !TODOS_PREFIXOS_CONHECIDOS.some((p) => name.startsWith(p));
+    // 1) Qualquer arquivo que contenha informe/politica/rai
+    if (SUBSTR_INCLUIR.outros.some((s) => name.includes(s))) return true;
+    // 2) Arquivos institucionais gerais (não pertencem a nenhum plano)
+    return !SUBSTR_PLANOS.some((s) => name.includes(s));
   }
-  return PREFIXOS_INCLUIR[ctx].some((p) => name.startsWith(p));
+  return SUBSTR_INCLUIR[ctx].some((s) => name.includes(s));
 }
 
 async function embedQuery(text: string): Promise<number[] | null> {
@@ -117,16 +119,26 @@ const NOMES: Record<Contexto, string> = {
   outros: "Outros Assuntos",
 };
 
+const PERSONAS: Record<Contexto, string> = {
+  invest: "Você é a Prev, especialista em InvestPrev do Agros.",
+  vida: "Você é a Prev, especialista em VidaPrev do Agros.",
+  saude: "Você é a Prev, especialista em Saúde do Agros (planos Agros Mais Saúde e PAS-UFV).",
+  planoa: "Você é a Prev, especialista no Plano A do Agros.",
+  outros: "Você é a Prev, assistente institucional do Agros para assuntos gerais (boletos, mensalidades, notícias, Educação Financeira e demandas administrativas).",
+};
+
 function regrasPorContexto(ctx: Contexto): string {
   const nome = NOMES[ctx];
   const outras = (Object.keys(NOMES) as Contexto[])
     .filter((c) => c !== ctx)
     .map((c) => NOMES[c])
     .join(" / ");
-  const base = `CONTEXTO ATUAL: ${nome} (o usuário entrou pelo cartão ${nome}).
+  const base = `${PERSONAS[ctx]}
+CONTEXTO ATUAL: ${nome} (o usuário entrou pelo cartão ${nome}).
 LIMITE ESTRITO: responda APENAS sobre temas pertinentes a ${nome}.
+NUNCA mencione outro plano como se fosse o contexto atual. NUNCA diga "estamos na aba do InvestPrev" se o contexto não for InvestPrev — use sempre "${nome}".
 Se o usuário perguntar sobre outro tema (${outras}), responda com educação:
-"Como estamos na aba do ${nome}, meu foco é este assunto. Para dúvidas de [outro tema], por favor, retorne à tela inicial e escolha o cartão correspondente."`;
+"Como estamos na aba de ${nome}, meu foco é este assunto. Para dúvidas de [outro tema], por favor, retorne à tela inicial e escolha o cartão correspondente."`;
 
   if (ctx === "outros") {
     return base + `\nSe a dúvida não estiver coberta pelos trechos da base, diga com gentileza que você é a Prev, IA em treinamento, e oriente a ligar para (31) 3899-6550 (dias úteis, 7h às 19h). NÃO invente.`;
@@ -151,9 +163,7 @@ ${trechosRag}\n`
 - Se houver links e imagens associados ao tema, agrupe-os e entregue-os organizados no FINAL da resposta.\n`
     : "";
 
-  return `Você é a Prev, assistente virtual do Agros.
-
-${regrasPorContexto(ctx)}
+  return `${regrasPorContexto(ctx)}
 
 COMPLETUDE E CONTEXTO (OBRIGATÓRIO):
 - Suas respostas NÃO devem ser curtas demais (monossilábicas) e nem extensas sem necessidade.
