@@ -126,10 +126,22 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const onlyFile: string | undefined = body?.file;
+    const limit: number = Number(body?.limit ?? 0) || 0;
+    const skipExisting: boolean = body?.skipExisting !== false; // default true
 
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
     let files = onlyFile ? [onlyFile] : await listPdfs(supabase);
+
+    if (!onlyFile && skipExisting) {
+      const { data: existing } = await supabase
+        .from("document_chunks")
+        .select("source");
+      const done = new Set((existing ?? []).map((r: any) => r.source));
+      files = files.filter((f) => !done.has(f));
+    }
+    if (limit > 0) files = files.slice(0, limit);
+
     const report: Array<{ file: string; chunks: number; pages: number; ok: boolean; error?: string }> = [];
 
     for (const file of files) {
