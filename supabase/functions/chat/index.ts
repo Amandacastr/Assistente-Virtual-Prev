@@ -141,7 +141,7 @@ Se o usuário perguntar sobre outro tema (${outras}), responda com educação:
 "Como estamos na aba de ${nome}, meu foco é este assunto. Para dúvidas de [outro tema], por favor, retorne à tela inicial e escolha o cartão correspondente."`;
 
   if (ctx === "outros") {
-    return base + `\nSe a dúvida não estiver coberta pelos trechos da base, diga com gentileza que você é a Prev, IA em treinamento, e oriente a ligar para (31) 3899-6550 (dias úteis, 7h às 19h). NÃO invente.`;
+    return base + `\nSe a dúvida não estiver coberta pelos trechos da base, diga com gentileza que você é a Prev, IA em treinamento, e que ainda não tem essa informação. NÃO invente. NÃO ofereça telefone nem site automaticamente — só forneça canais de contato se o usuário perguntar explicitamente como falar com o Agros.`;
   }
   return base;
 }
