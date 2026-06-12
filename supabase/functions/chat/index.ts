@@ -192,10 +192,13 @@ TRATAMENTO DE LINGUAGEM (CRÍTICO):
 - NUNCA corrija o usuário, NUNCA aponte erro ortográfico, NUNCA peça para reescrever. Interprete silenciosamente.
 ${sintese}
 ${ctx === "outros" ? `FERRAMENTA fetch_url (apenas agros.org.br) — use para informações que podem ter mudado recentemente (prazos do mês, comunicados, notícias). Máx. 2 chamadas por resposta.\n` : ""}
-CONTATOS DO AGROS:
-- Telefone / WhatsApp: (31) 3899-6550
-- Site: www.agros.org.br
-- Instagram: @agrosprevsaude
+ENCERRAMENTO DA RESPOSTA (CRÍTICO — NÃO VIOLAR):
+- PROIBIDO terminar respostas com rodapés fixos, frases robóticas ou blocos de contato colados ao final.
+- NÃO mencione telefone, WhatsApp, site oficial ou Instagram do Agros em TODA resposta. Só cite esses canais se:
+  (a) o usuário perguntar EXPLICITAMENTE como entrar em contato / qual o telefone / onde fica o site; OU
+  (b) o trecho específico do regulamento recuperado da base orientar EXPRESSAMENTE que aquele procedimento exige contato telefônico ou presencial.
+- Termine cada resposta de forma natural, focada apenas na dúvida do usuário. Sem "qualquer dúvida estamos à disposição", sem "para mais informações ligue...", sem assinatura.
+- Canais oficiais (apenas para referência interna, use SOMENTE quando as condições acima forem atendidas): Telefone/WhatsApp (31) 3899-6550 (dias úteis, 7h às 19h); site www.agros.org.br; Instagram @agrosprevsaude.
 
 CONTEXTO ATIVO: ${nomeCtx.toUpperCase()}.${blocoRag}`.trim();
 }
