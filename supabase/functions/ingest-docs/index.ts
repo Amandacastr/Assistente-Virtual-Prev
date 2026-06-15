@@ -22,7 +22,12 @@ const BUCKET = "base_documentos";
 const EMBED_MODEL = "openai/text-embedding-3-small"; // 1536 dims
 const EMBED_URL = "https://ai.gateway.lovable.dev/v1/embeddings";
 
+function sanitize(s: string): string {
+  // Strip NULs and lone surrogates that break JSON/Postgres text.
+  return s.replace(/\u0000/g, "").replace(/[\uD800-\uDFFF]/g, "");
+}
 function chunkText(text: string, target = 1200, overlap = 200): string[] {
+  text = sanitize(text);
   const clean = text.replace(/\s+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
   if (!clean) return [];
   const chunks: string[] = [];
