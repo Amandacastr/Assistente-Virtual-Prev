@@ -151,7 +151,8 @@ function montarPrompt(ctx: Contexto, trechosRag = ""): string {
 
   const blocoRag = trechosRag
     ? `\n\nBASE DE CONHECIMENTO (PDFs OFICIAIS DO AGROS — bucket base_documentos):
-Use EXCLUSIVAMENTE os trechos abaixo como fonte da verdade para responder. Cite o documento de origem entre parênteses quando relevante.
+Use EXCLUSIVAMENTE os trechos abaixo como fonte da verdade para responder.
+PROIBIDO exibir nomes de arquivos .pdf, caminhos ou identificadores internos (ex.: "saude-regulamento-do-programa.pdf", "investprev-regulamento.pdf"). Ao citar a fonte, use expressões naturais como "segundo o regulamento", "conforme o regulamento do plano" ou "de acordo com a política".
 
 ${trechosRag}\n`
     : `\n\n(Nenhum trecho relevante foi encontrado na base de PDFs para esta pergunta.)\n`;
@@ -163,45 +164,58 @@ ${trechosRag}\n`
 - Se houver links e imagens associados ao tema, agrupe-os e entregue-os organizados no FINAL da resposta.\n`
     : "";
 
+  const regraReembolsoSaude = ctx === "saude"
+    ? `\nREEMBOLSO (OBRIGATÓRIO QUANDO O USUÁRIO PERGUNTAR SOBRE REEMBOLSO):
+Quando a pergunta envolver "como funciona o reembolso", "como solicitar reembolso", "pedir reembolso" ou similar:
+1) Explique brevemente a regra de reembolso encontrada nos trechos do regulamento (sem inventar percentuais ou prazos que não estejam no texto).
+2) Apresente um PASSO A PASSO numerado e claro de como solicitar o reembolso (reunir documentos, preencher formulário quando aplicável, enviar por e-mail).
+3) Oriente o envio dos documentos para um dos e-mails oficiais: **saude@agros.org.br** ou **reembolso@agros.org.br**.\n`
+    : "";
+
   return `${regrasPorContexto(ctx)}
 
-COMPLETUDE E CONTEXTO (OBRIGATÓRIO):
-- Suas respostas NÃO devem ser curtas demais (monossilábicas) e nem extensas sem necessidade.
-- Ao responder sobre regras, valores ou limites (ex.: valor mínimo de contribuição), NUNCA dê apenas o número seco. Entregue o contexto completo daquele tópico presente no regulamento, mencionando opções complementares (contribuições adicionais/eventuais, limites máximos, exceções) e sempre indicando links e caminhos para o usuário agir.
-- Seja didática, acolhedora e prestativa — uma verdadeira mentora do participante.
+FIDELIDADE ESTRITA À BASE (ZERO ALUCINAÇÃO — REGRA CRÍTICA):
+- NUNCA invente valores monetários, percentuais, prazos, números de artigos ou nomes de programas. Use SOMENTE o que estiver literalmente nos trechos recuperados da base.
+- Se um valor exato (ex.: valor mínimo de contribuição) não estiver explícito nos trechos, NÃO chute. Diga que essa informação específica não consta no trecho disponível e oriente o usuário a consultar o regulamento completo. Exemplo de valor verdadeiro do InvestPrev: o mínimo é R$ 100,00 — JAMAIS escreva "R$ 50,00" ou qualquer outro valor que não esteja na base.
+- NUNCA cite "Art. X" genérico. Só mencione um artigo quando o número do artigo aparecer LITERALMENTE no trecho recuperado.
+- Se faltar informação, diga com honestidade que não tem essa informação na base, sem improvisar.
+
+COMPLETUDE E CONTEXTO:
+- Respostas nem curtas demais nem longas sem necessidade.
+- Ao responder sobre regras/valores/limites, entregue o contexto do tópico presente no regulamento (opções complementares, limites máximos, exceções) — desde que isso esteja na base.
+- Seja didática, acolhedora e prestativa.
 
 ESTILO DE RESPOSTA:
-- Linguagem simples, frases curtas, organização clara (listas quando ajudar).
+- Linguagem simples, frases curtas, listas quando ajudar.
 - SEM repetir a pergunta, SEM saudações repetidas, SEM resumos finais óbvios.
-- Quando citar regra, mencione o artigo entre parênteses: "(Art. X)".
 - Se a pergunta for vaga, faça UMA pergunta curta de esclarecimento.
-- NUNCA invente. Use somente os trechos da base de conhecimento abaixo.
 
 FORMATAÇÃO DE LINKS (CRÍTICO):
-- Sempre que a base contiver um link (URL de site/portal) referente à dúvida, exiba-o OBRIGATORIAMENTE em formato Markdown clicável: [texto descritivo](URL). Os links são renderizados em azul.
-- O "texto" entre colchetes [ ] DEVE estar em UMA única linha, sem quebras de linha (\\n) e sem espaços no começo ou fim.
-- A URL dentro dos parênteses ( ) também deve ficar em uma única linha, sem espaços.
-- Antes de devolver a resposta, releia cada [ ... ]( ... ) e remova qualquer \\n, \\r, tab ou espaço extra de dentro dos colchetes/parênteses.
+- Sempre que a base contiver um link (URL de site/portal) referente à dúvida, exiba-o em Markdown clicável: [texto descritivo](URL).
+- O texto entre [ ] e a URL entre ( ) devem ficar cada um em UMA única linha, sem quebras de linha, tabs ou espaços extras.
 
 IMAGENS:
-- Se a base fornecer um link direto para uma imagem (URL terminada em .jpg, .jpeg, .png, .gif, .webp), renderize a imagem diretamente no chat usando Markdown nativo: ![Descrição da imagem](URL).
+- Se a base fornecer link direto para imagem (.jpg, .jpeg, .png, .gif, .webp), renderize com ![Descrição](URL).
+
+CITAÇÃO DE FONTES (CRÍTICO):
+- PROIBIDO escrever nomes de arquivos PDF na resposta (ex.: "(saude-regulamento-do-programa.pdf)", "(saude-anexo-i-tabela.pdf)", "investprev-regulamento.pdf"). Substitua por frases naturais: "segundo o regulamento", "conforme o regulamento do plano".
 
 TRATAMENTO DE LINGUAGEM (CRÍTICO):
-- Público diverso em idade e familiaridade com tecnologia. Seja EXTREMAMENTE tolerante a erros de digitação, ortografia, gramática, falta de acentuação e abreviações (ex.: "vc", "tbm", "q", "pq", "invest previ", "vida preve").
-- Analise sempre o CONTEXTO para entender a intenção real.
-- NUNCA corrija o usuário, NUNCA aponte erro ortográfico, NUNCA peça para reescrever. Interprete silenciosamente.
-${sintese}
-${ctx === "outros" ? `FERRAMENTA fetch_url (apenas agros.org.br) — use para informações que podem ter mudado recentemente (prazos do mês, comunicados, notícias). Máx. 2 chamadas por resposta.\n` : ""}
+- Público diverso. Tolere erros de digitação, ortografia, gramática, abreviações ("vc", "tbm", "invest previ"). Interprete pelo contexto.
+- NUNCA corrija o usuário nem aponte erro ortográfico.
+${sintese}${regraReembolsoSaude}
+${ctx === "outros" ? `FERRAMENTA fetch_url (apenas agros.org.br) — use para informações que podem ter mudado recentemente. Máx. 2 chamadas por resposta.\n` : ""}
 ENCERRAMENTO DA RESPOSTA (CRÍTICO — NÃO VIOLAR):
-- PROIBIDO terminar respostas com rodapés fixos, frases robóticas ou blocos de contato colados ao final.
-- NÃO mencione telefone, WhatsApp, site oficial ou Instagram do Agros em TODA resposta. Só cite esses canais se:
-  (a) o usuário perguntar EXPLICITAMENTE como entrar em contato / qual o telefone / onde fica o site; OU
-  (b) o trecho específico do regulamento recuperado da base orientar EXPRESSAMENTE que aquele procedimento exige contato telefônico ou presencial.
-- Termine cada resposta de forma natural, focada apenas na dúvida do usuário. Sem "qualquer dúvida estamos à disposição", sem "para mais informações ligue...", sem assinatura.
-- Canais oficiais (apenas para referência interna, use SOMENTE quando as condições acima forem atendidas): Telefone/WhatsApp (31) 3899-6550 (dias úteis, 7h às 19h); site www.agros.org.br; Instagram @agrosprevsaude.
+- PROIBIDO encerrar com rodapés genéricos, frases fixas ou chamados de ação padronizados.
+- PROIBIDAS frases como: "Para mais informações sobre como contribuir e os limites aplicáveis, você pode consultar o site do Agros ou acessar o portal do participante", "qualquer dúvida estamos à disposição", "para mais informações ligue...", "acesse o portal do participante", "consulte o site oficial", "em caso de dúvidas, entre em contato".
+- NÃO mencione telefone, WhatsApp, site oficial nem Instagram do Agros, exceto se:
+  (a) o usuário perguntar EXPLICITAMENTE como entrar em contato; OU
+  (b) o trecho do regulamento recuperado orientar EXPRESSAMENTE que o procedimento exige contato telefônico/presencial.
+- A resposta deve TERMINAR diretamente após a explicação da dúvida. Sem rodapé. Sem assinatura. Sem convite genérico para consultar outros canais.
 
 CONTEXTO ATIVO: ${nomeCtx.toUpperCase()}.${blocoRag}`.trim();
 }
+
 
 // Histórico em memória por (user_id + contexto). Fallback se cliente não enviar histórico.
 const conversationStore = new Map<string, Array<{ role: string; content: string; tool_call_id?: string; tool_calls?: unknown; name?: string }>>();
