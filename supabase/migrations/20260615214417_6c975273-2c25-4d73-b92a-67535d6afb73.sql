@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Public read base_documentos" ON storage.objects;
