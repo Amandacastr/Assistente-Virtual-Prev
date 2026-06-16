@@ -6,55 +6,53 @@
 
 @layer base {
   :root {
-    /* Paleta Agros */
-    --background: 213 80% 12%;            /* azul-esc #041e3a */
+    /* Paleta Agros — Azul Oficial #005BB0 (extraído do site agros.org.br) */
+    --background: 209 100% 22%;           /* azul Agros escuro */
     --foreground: 0 0% 100%;
 
-    --card: 213 60% 18%;
+    --card: 209 100% 28%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 213 60% 18%;
+    --popover: 209 100% 28%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 210 83% 27%;               /* azul #0c4880 */
+    --primary: 209 100% 35%;              /* azul Agros oficial #005BB0 */
     --primary-foreground: 0 0% 100%;
 
-    --primary-glow: 210 68% 39%;          /* azul-md #1f65a7 */
+    --primary-glow: 209 100% 45%;
 
-    --secondary: 213 40% 22%;
+    --secondary: 209 80% 30%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 213 30% 25%;
-    --muted-foreground: 213 15% 75%;
+    --muted: 209 50% 32%;
+    --muted-foreground: 209 25% 85%;
 
     --accent: 43 53% 55%;                 /* dourado #c9a94e */
-    --accent-foreground: 213 80% 10%;
-    --accent-glow: 45 60% 76%;            /* dourado-cl */
+    --accent-foreground: 209 100% 18%;
+    --accent-glow: 45 60% 76%;
 
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 213 25% 28%;
-    --input: 213 25% 28%;
+    --border: 209 60% 38%;
+    --input: 209 60% 38%;
     --ring: 43 53% 55%;
 
     --radius: 1rem;
 
     /* Cores específicas do chat (fundo claro estilo whatsapp) */
-    --chat-bg: 213 25% 96%;
+    --chat-bg: 209 25% 96%;
     --chat-surface: 0 0% 100%;
-    --chat-border: 213 20% 90%;
-    --chat-text: 213 30% 12%;
-    --chat-bubble-user: 210 83% 27%;
+    --chat-border: 209 20% 90%;
+    --chat-text: 209 30% 12%;
+    --chat-bubble-user: 209 100% 35%;
     --chat-bubble-bot: 0 0% 100%;
 
-    /* Gradientes e sombras */
-    --gradient-bg: radial-gradient(ellipse 80% 60% at 20% 10%, hsl(210 70% 25%) 0%, transparent 60%),
-                   radial-gradient(ellipse 60% 50% at 80% 90%, hsl(213 75% 18%) 0%, transparent 55%),
-                   radial-gradient(ellipse 100% 80% at 50% 50%, hsl(213 80% 12%) 0%, hsl(213 80% 8%) 100%);
+    /* Gradientes e sombras — replica do site oficial Agros */
+    --gradient-bg: linear-gradient(180deg, hsl(209 100% 35%) 0%, hsl(211 100% 22%) 60%, hsl(212 100% 14%) 100%);
     --gradient-gold: linear-gradient(90deg, hsl(43 53% 55%), hsl(45 60% 70%));
-    --gradient-blue: linear-gradient(90deg, hsl(210 68% 39%), hsl(210 80% 60%));
-    --shadow-card: 0 24px 60px hsl(213 80% 4% / 0.45);
+    --gradient-blue: linear-gradient(90deg, hsl(209 100% 35%), hsl(209 100% 50%));
+    --shadow-card: 0 24px 60px hsl(212 100% 6% / 0.45);
     --shadow-gold: 0 12px 36px hsl(43 53% 45% / 0.25);
   }
 }
