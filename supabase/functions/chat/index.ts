@@ -84,25 +84,23 @@ async function retrieveDocs(
   ctx: Contexto,
   k = 6,
 ): Promise<Array<{ source: string; page: number | null; content: string; similarity: number }>> {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return [];
+  if (!supabaseAdmin) {
+    console.error("RAG indisponível: SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY ausente.");
+    return [];
+  }
   const vec = await embedQuery(query);
   if (!vec) return [];
   try {
-    // Busca um pool maior e filtra por prefixo do arquivo em JS (metadata filtering).
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/match_document_chunks`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      },
-      body: JSON.stringify({ query_embedding: vec, match_count: 40 }),
+    // Busca um pool maior com cliente admin (Service Role) para contornar RLS e filtra por contexto em JS.
+    const { data, error } = await supabaseAdmin.rpc("match_document_chunks", {
+      query_embedding: vec,
+      match_count: 40,
     });
-    if (!res.ok) {
-      console.error("rpc err", res.status, await res.text());
+    if (error) {
+      console.error("rpc err", error.message, error.details ?? "", error.hint ?? "");
       return [];
     }
-    const rows = (await res.json()) as Array<any>;
+    const rows = (data ?? []) as Array<any>;
     return rows
       .filter((r) => typeof r?.similarity === "number" && r.similarity > 0.2)
       .filter((r) => chunkMatchesContext(String(r.source ?? ""), ctx))
