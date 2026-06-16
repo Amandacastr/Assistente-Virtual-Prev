@@ -287,6 +287,56 @@ function normalizarAssistant(raw: unknown): Contexto {
   return "invest";
 }
 
+// Retry com exponential backoff para a API da LLM (Groq).
+// - Retenta em erros de rede, timeouts e respostas 429/5xx.
+// - Respeita o header Retry-After quando presente.
+// - Total: até 3 tentativas (1 inicial + 2 retries), com teto curto para
+//   não estourar o limite de execução da Edge Function.
+async function callGroqWithRetry(
+  apiKey: string,
+  payload: Record<string, unknown>,
+  maxAttempts = 3,
+): Promise<Response> {
+  let lastErr: unknown = null;
+  let lastResp: Response | null = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const res = await fetch(GROQ_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          Connection: "keep-alive",
+        },
+        body: JSON.stringify(payload),
+        // Timeout por tentativa — evita prender a Edge Function.
+        signal: AbortSignal.timeout(45_000),
+        keepalive: true,
+      });
+
+      const retriable = res.status === 429 || res.status >= 500;
+      if (!retriable || attempt === maxAttempts) return res;
+
+      // Backoff: respeita Retry-After se vier; senão 1s, 2s, ...
+      const retryAfter = Number(res.headers.get("retry-after"));
+      const delayMs = Number.isFinite(retryAfter) && retryAfter > 0
+        ? Math.min(retryAfter * 1000, 4000)
+        : Math.min(1000 * 2 ** (attempt - 1), 4000);
+      console.warn(`Groq ${res.status} — retry ${attempt}/${maxAttempts - 1} em ${delayMs}ms`);
+      try { await res.body?.cancel(); } catch { /* noop */ }
+      lastResp = res;
+      await new Promise((r) => setTimeout(r, delayMs));
+    } catch (e) {
+      lastErr = e;
+      console.warn(`Falha de rede na chamada Groq (tentativa ${attempt}):`, (e as Error).message);
+      if (attempt === maxAttempts) break;
+      await new Promise((r) => setTimeout(r, Math.min(1000 * 2 ** (attempt - 1), 4000)));
+    }
+  }
+  if (lastResp) return lastResp;
+  throw lastErr ?? new Error("Falha ao chamar LLM (Groq).");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
