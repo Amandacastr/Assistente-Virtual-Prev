@@ -353,21 +353,19 @@ Deno.serve(async (req) => {
         payload.tool_choice = "auto";
       }
 
-      const groqRes = await fetch(GROQ_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${GROQ_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const groqRes = await callGroqWithRetry(GROQ_API_KEY, payload);
 
       if (!groqRes.ok) {
-        const errText = await groqRes.text();
+        const errText = await groqRes.text().catch(() => "");
         console.error(`Groq erro ${groqRes.status}: ${errText}`);
+        // Mantém CORS no erro para o navegador não mascarar como "Failed to fetch".
+        const status = groqRes.status === 429 ? 429 : (groqRes.status >= 500 ? 502 : 500);
+        const userMsg = groqRes.status === 429
+          ? "Estamos com alta demanda no momento. Por favor, tente novamente em alguns instantes."
+          : "Erro ao processar sua pergunta. Tente novamente em instantes.";
         return new Response(
-          JSON.stringify({ error: "Erro ao processar. Tente novamente." }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: userMsg }),
+          { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
