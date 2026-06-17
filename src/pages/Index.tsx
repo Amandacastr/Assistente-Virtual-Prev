@@ -81,7 +81,7 @@ const Index = () => {
             to="/chat/saude"
             tag="Saúde Agros"
             tagTone="rose"
-            icon={<HeartPulse className="h-5 w-5 sm:h-6 sm:w-6 text-rose-300" />}
+            icon={<HeartPulse className="h-5 w-5 sm:h-6 sm:w-6 text-rose-400" />}
             title="Saúde"
             desc="Tire suas dúvidas sobre os planos Agros Mais Saúde e PAS-UFV, rede credenciada, coparticipação, coberturas e Espaço Agros + Saúde."
             cta="Conversar sobre Saúde"
@@ -91,7 +91,7 @@ const Index = () => {
             to="/chat/planoa"
             tag="Fechado para novas adesões"
             tagTone="violet"
-            icon={<FileText className="h-5 w-5 sm:h-6 sm:w-6 text-violet-300" />}
+            icon={<FileText className="h-5 w-5 sm:h-6 sm:w-6 text-violet-400" />}
             title="Plano A"
             desc="Plano previdenciário na modalidade de Benefício Definido (CLT), fechado para novas adesões. Tire suas dúvidas sobre o regulamento."
             cta="Conversar sobre Plano A"
@@ -101,7 +101,7 @@ const Index = () => {
             to="/chat/outros"
             tag="Demais demandas"
             tagTone="green"
-            icon={<MessagesSquare className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-300" />}
+            icon={<MessagesSquare className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-400" />}
             title="Outros Assuntos"
             desc="Tire suas dúvidas sobre emissão de boletos, mensalidades, notícias, Educação Financeira e demandas administrativas gerais do Agros."
             cta="Conversar sobre Outros Assuntos"
