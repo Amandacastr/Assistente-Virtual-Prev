@@ -172,7 +172,7 @@ ${trechosRag}\n`
 - Se houver links e imagens associados ao tema, agrupe-os e entregue-os organizados no FINAL da resposta.\n`
     : "";
 
-  const regraReembolsoSaude = ctx === "saude"
+  const regrasFixasSaude = ctx === "saude"
     ? `\nREEMBOLSO (OBRIGATÓRIO QUANDO O USUÁRIO PERGUNTAR SOBRE REEMBOLSO):
 Quando a pergunta envolver "como funciona o reembolso", "como solicitar reembolso", "pedir reembolso" ou similar:
 1) Explique brevemente a regra de reembolso encontrada nos trechos do regulamento (sem inventar percentuais ou prazos que não estejam no texto).
