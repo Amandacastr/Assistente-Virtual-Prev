@@ -185,25 +185,25 @@ interface CardProps {
 }
 
 const TAG_CLS: Record<Tone, string> = {
-  blue: "bg-primary-glow/30 text-sky-200 border-sky-300/20",
-  green: "bg-emerald-500/20 text-emerald-200 border-emerald-300/30",
-  gold: "bg-accent/20 text-accent-glow border-accent/30",
-  rose: "bg-rose-500/20 text-rose-200 border-rose-300/30",
-  violet: "bg-violet-500/20 text-violet-200 border-violet-300/30",
+  blue: "bg-sky-800/30 text-sky-300 border-sky-600/25",
+  green: "bg-emerald-700/25 text-emerald-300 border-emerald-500/30",
+  gold: "bg-[hsl(43_48%_42%)]/20 text-[hsl(45_55%_70%)] border-[hsl(43_48%_42%)]/25",
+  rose: "bg-rose-700/25 text-rose-300 border-rose-500/30",
+  violet: "bg-violet-700/25 text-violet-300 border-violet-500/30",
 };
 const ICON_WRAP_CLS: Record<Tone, string> = {
-  blue: "bg-sky-700/15 border-sky-600/40",
-  green: "bg-emerald-500/15 border-emerald-400/40",
-  gold: "bg-accent/15 border-accent/30",
-  rose: "bg-rose-500/15 border-rose-400/40",
-  violet: "bg-violet-500/15 border-violet-400/40",
+  blue: "bg-sky-800/20 border-sky-700/40",
+  green: "bg-emerald-700/15 border-emerald-500/40",
+  gold: "bg-[hsl(43_48%_42%)]/15 border-[hsl(43_48%_42%)]/30",
+  rose: "bg-rose-700/15 border-rose-500/40",
+  violet: "bg-violet-700/15 border-violet-500/40",
 };
 const BTN_CLS: Record<Tone, string> = {
-  blue: "bg-sky-700 text-white border-2 border-sky-700",
-  green: "bg-emerald-600 text-white border-2 border-emerald-600",
-  gold: "bg-accent/90 text-[hsl(30_40%_8%)] border border-accent",
-  rose: "bg-rose-600 text-white border-2 border-rose-600",
-  violet: "bg-violet-600 text-white border-2 border-violet-600",
+  blue: "bg-sky-800 text-white border-2 border-sky-800",
+  green: "bg-emerald-700 text-white border-2 border-emerald-700",
+  gold: "bg-[hsl(43_48%_42%)] text-[hsl(30_40%_8%)] border border-[hsl(43_48%_42%)]",
+  rose: "bg-rose-700 text-white border-2 border-rose-700",
+  violet: "bg-violet-700 text-white border-2 border-violet-700",
 };
 
 const PlanCard = ({ to, tag, tagTone, icon, title, desc, cta, ctaTone, showArrowPulse }: CardProps) => {
