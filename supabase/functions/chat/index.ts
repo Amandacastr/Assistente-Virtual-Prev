@@ -184,7 +184,7 @@ Quando a pergunta envolver "como funciona o reembolso", "como solicitar reembols
     ? `\nREGRA DE NEGÓCIO FIXA — INVESTPREV (VALOR MÍNIMO DE CONTRIBUIÇÃO):\nSempre que o usuário perguntar sobre o valor mínimo de contribuição do plano InvestPrev, responda CATEGORICAMENTE que o valor mínimo é de R$ 100,00 mensais.\nEm seguida, complemente informando que o usuário tem total flexibilidade para contribuir com valores maiores ou fazer contribuições eventuais/voluntárias livres para aumentar sua reserva, conforme as regras do plano. NÃO cite que o valor é "definido pelo Conselho" como resposta principal; use apenas a informação fixa de R$ 100,00.\n`
     : "";
 
-  return `${regrasPorContexto(ctx)}${regraValorMinimoInvestPrev}
+  return `${regrasPorContexto(ctx)}${regrasFixasSaude}${regraValorMinimoInvestPrev}`
 
 FIDELIDADE ESTRITA À BASE (ZERO ALUCINAÇÃO — REGRA CRÍTICA):
 - NUNCA invente valores monetários, percentuais, prazos, números de artigos ou nomes de programas. Use SOMENTE o que estiver literalmente nos trechos recuperados da base.
