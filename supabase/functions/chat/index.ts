@@ -195,8 +195,7 @@ Se o usuário perguntar especificamente o valor do reembolso de uma ressonância
     ? `\nREGRA DE NEGÓCIO FIXA — INVESTPREV (VALOR MÍNIMO DE CONTRIBUIÇÃO):\nSempre que o usuário perguntar sobre o valor mínimo de contribuição do plano InvestPrev, responda CATEGORICAMENTE que o valor mínimo é de R$ 100,00 mensais.\nEm seguida, complemente informando que o usuário tem total flexibilidade para contribuir com valores maiores ou fazer contribuições eventuais/voluntárias livres para aumentar sua reserva, conforme as regras do plano. NÃO cite que o valor é "definido pelo Conselho" como resposta principal; use apenas a informação fixa de R$ 100,00.\n`
     : "";
 
-  return `${regrasPorContexto(ctx)}${regrasFixasSaude}${regraValorMinimoInvestPrev}
-
+  return `${regrasPorContexto(ctx)}${regraValorMinimoInvestPrev}
 
 FIDELIDADE ESTRITA À BASE (ZERO ALUCINAÇÃO — REGRA CRÍTICA):
 - NUNCA invente valores monetários, percentuais, prazos, números de artigos ou nomes de programas. Use SOMENTE o que estiver literalmente nos trechos recuperados da base.
@@ -227,7 +226,7 @@ CITAÇÃO DE FONTES (CRÍTICO):
 TRATAMENTO DE LINGUAGEM (CRÍTICO):
 - Público diverso. Tolere erros de digitação, ortografia, gramática, abreviações ("vc", "tbm", "invest previ"). Interprete pelo contexto.
 - NUNCA corrija o usuário nem aponte erro ortográfico.
-${sintese}${regraReembolsoSaude}
+${sintese}${regrasFixasSaude}
 ${ctx === "outros" ? `FERRAMENTA fetch_url (apenas agros.org.br) — use para informações que podem ter mudado recentemente. Máx. 2 chamadas por resposta.\n` : ""}
 ENCERRAMENTO DA RESPOSTA (CRÍTICO — NÃO VIOLAR):
 - PROIBIDO encerrar com rodapés genéricos, frases fixas ou chamados de ação padronizados.
