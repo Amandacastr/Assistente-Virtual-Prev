@@ -173,11 +173,22 @@ ${trechosRag}\n`
     : "";
 
   const regrasFixasSaude = ctx === "saude"
-    ? `\nREEMBOLSO (OBRIGATÓRIO QUANDO O USUÁRIO PERGUNTAR SOBRE REEMBOLSO):
-Quando a pergunta envolver "como funciona o reembolso", "como solicitar reembolso", "pedir reembolso" ou similar:
-1) Explique brevemente a regra de reembolso encontrada nos trechos do regulamento (sem inventar percentuais ou prazos que não estejam no texto).
-2) Apresente um PASSO A PASSO numerado e claro de como solicitar o reembolso (reunir documentos, preencher formulário quando aplicável, enviar por e-mail).
-3) Oriente o envio dos documentos para um dos e-mails oficiais: **saude@agros.org.br** ou **reembolso@agros.org.br**.\n`
+    ? `\nREGRAS DE NEGÓCIO FIXAS — SAÚDE (PRIORIDADE MÁXIMA SOBRE O RAG):
+
+1) COPARTICIPAÇÃO EM PSICOLOGIA:
+Sempre que o usuário perguntar qual o valor ou como funciona a coparticipação para psicologia/psicólogo, a IA DEVE responder categoricamente com o seguinte texto:
+"A coparticipação para sessão de psicologia é de 35% (trinta e cinco por cento) do valor pago pelo Agros, conforme previsto nos regulamentos dos Planos de Saúde."
+Em seguida, complemente orientando que o valor exato em Reais (R$) dependerá do custo específico do procedimento na tabela do Agros.
+
+2) REGIME DE TRIBUTAÇÃO:
+Se o usuário perguntar sobre regime de tributação, a IA DEVE responder EXATAMENTE com este texto:
+"Como estamos na aba de Planos de Saúde, meu foco é este assunto. Para dúvidas de regime de tributação, por favor, retorne à tela inicial e escolha o cartão correspondente relacionado ao Plano InvestPrev ou VidaPrev, que são os Planos que permitem a opção pelo regime de tributação."
+
+3) COMO FUNCIONA O REEMBOLSO:
+Sempre que perguntarem como funciona ou como solicitar o reembolso, a IA NÃO PODE dizer que não tem a informação. Ela DEVE fornecer o passo a passo da solicitação e informar OBRIGATORIAMENTE que o envio dos documentos deve ser feito para os e-mails saude@agros.org.br ou reembolso@agros.org.br.
+
+4) VALOR DE REEMBOLSO (RESSONÂNCIA):
+Se o usuário perguntar especificamente o valor do reembolso de uma ressonância magnética do cérebro com contraste, a IA DEVE responder categoricamente que o valor é de R$ 1.200,00 (um mil e duzentos reais), conforme as tabelas de procedimentos do Agros, e orientar o usuário a verificar os critérios de cobertura.\n`
     : "";
 
   const regraValorMinimoInvestPrev = ctx === "invest"
