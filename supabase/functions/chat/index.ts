@@ -115,7 +115,10 @@ async function retrieveDocs(
 function formatRetrieved(docs: Array<{ source: string; page: number | null; content: string }>): string {
   if (!docs.length) return "";
   return docs
-    .map((d, i) => `[Trecho ${i + 1} — ${d.source}${d.page ? `, p.${d.page}` : ""}]\n${d.content}`)
+    .map((d, i) => {
+      const c = String(d.content ?? "").slice(0, 900);
+      return `[Trecho ${i + 1} — ${d.source}${d.page ? `, p.${d.page}` : ""}]\n${c}`;
+    })
     .join("\n\n");
 }
 
