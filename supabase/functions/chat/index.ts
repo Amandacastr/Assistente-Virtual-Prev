@@ -389,7 +389,7 @@ Deno.serve(async (req) => {
     if (clientHistory.length > 0) {
       historico = clientHistory
         .filter((m: any) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
-        .map((m: any) => ({ role: m.role, content: String(m.content).slice(0, 2000) }));
+        .map((m: any) => ({ role: m.role, content: String(m.content).slice(0, 600) }));
       if (!historico.length || historico[historico.length - 1].role !== "user" || historico[historico.length - 1].content !== mensagem) {
         historico.push({ role: "user", content: mensagem });
       }
@@ -397,10 +397,10 @@ Deno.serve(async (req) => {
       historico = conversationStore.get(chave) ?? [];
       historico.push({ role: "user", content: mensagem });
     }
-    const ultimas = historico.slice(-20);
+    const ultimas = historico.slice(-8);
 
     // RAG com filtro de prefixo por contexto.
-    const retrieved = await retrieveDocs(mensagem, ctx, 6);
+    const retrieved = await retrieveDocs(mensagem, ctx, 4);
     const trechosRag = formatRetrieved(retrieved);
 
     const mensagensIA: Array<Record<string, unknown>> = [
@@ -413,7 +413,7 @@ Deno.serve(async (req) => {
       const payload: Record<string, unknown> = {
         model: GROQ_MODEL,
         messages: mensagensIA,
-        max_tokens: 600,
+        max_tokens: 500,
         temperature: 0.2,
       };
       if (ctx === "outros") {
