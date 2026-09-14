@@ -56,7 +56,7 @@ const Index = () => {
           Selecione um plano
         </p>
 
-        <div className="flex flex-wrap justify-center gap-4 sm:gap-5 w-full max-w-5xl items-stretch [&>a]:w-full [&>a]:sm:w-[calc(50%-0.625rem)] [&>a]:lg:w-[calc(33.333%-0.835rem)]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full max-w-5xl auto-rows-fr">
           <PlanCard
             to="/chat/invest"
             tag="Aberto a novas adesões"
