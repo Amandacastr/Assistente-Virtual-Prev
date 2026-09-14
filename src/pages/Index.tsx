@@ -56,7 +56,7 @@ const Index = () => {
           Selecione um plano
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full max-w-5xl auto-rows-fr">
+        <div className="flex w-full max-w-5xl flex-wrap justify-center gap-4 sm:gap-5">
           <PlanCard
             to="/chat/invest"
             tag="Aberto a novas adesões"
@@ -215,7 +215,7 @@ const PlanCard = ({ to, tag, tagTone, icon, title, desc, cta, ctaTone, showArrow
   return (
     <Link
       to={to}
-      className="group relative block h-full transition-all duration-300 hover:-translate-y-1.5"
+      className="group relative block h-[310px] w-full transition-all duration-300 hover:-translate-y-1.5 sm:h-[330px] sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)]"
     >
       <div className="flex h-full flex-col overflow-hidden rounded-3xl glass p-5 sm:p-7 transition-all duration-300 group-hover:shadow-[var(--shadow-card)] group-hover:border-white/20">
         <span
