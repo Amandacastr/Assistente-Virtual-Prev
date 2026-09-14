@@ -13,7 +13,7 @@ const corsHeaders = {
 };
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+const GROQ_MODEL = "openai/gpt-oss-120b";
 
 // ---- RAG ----
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
