@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, ShieldCheck, TrendingUp, Shield, Phone, Globe, Instagram, MessagesSquare, HeartPulse, FileText } from "lucide-react";
+import { ArrowRight, TrendingUp, Shield, Phone, Globe, Instagram, MessagesSquare, HeartPulse, FileText } from "lucide-react";
 import { PrevMascot } from "@/components/PrevMascot";
 import { AgrosLogo } from "@/components/AgrosLogo";
 
@@ -22,10 +22,6 @@ const Index = () => {
         <AgrosLogo height={30} className="brightness-0 invert" />
         <div className="h-5 w-px bg-white/20" />
         <span className="text-white/50 text-xs">Assistente de Previdência</span>
-        <div className="ml-auto hidden sm:flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/60">
-          <ShieldCheck className="h-3 w-3 opacity-70" />
-          Regulamentado pela PREVIC
-        </div>
       </header>
 
       {/* Main */}
