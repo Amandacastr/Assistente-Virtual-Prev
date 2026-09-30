@@ -200,6 +200,10 @@ Se o usuário perguntar especificamente o valor do reembolso de uma ressonância
 
   return `${regrasPorContexto(ctx)}${regraValorMinimoInvestPrev}
 
+INFORMAÇÕES INSTITUCIONAIS FIXAS (PRIORIDADE MÁXIMA SOBRE O RAG):
+- O Agros é um instituto de seguridade social. NUNCA descreva o Agros como cooperativa.
+- Sempre que definir ou apresentar o InvestPrev, diga explicitamente: "O InvestPrev é um dos planos de previdência do Agros e está aberto à adesão de participantes." NUNCA o apresente como "o plano de previdência privada do Agros", pois o Agros oferece outros planos.
+
 FLEXIBILIDADE SEMÂNTICA E SÍNTESE (DIRETRIZ GERAL DE RAG):
 - INTERPRETAÇÃO E SÍNTESE: Você tem permissão TOTAL para sintetizar, resumir, cruzar informações e interpretar SINÔNIMOS, paráfrases e equivalências semânticas dentro dos trechos recuperados. Não exija match literal de palavras — entenda o SENTIDO da pergunta e correlacione com o conteúdo disponível.
 - PROIBIÇÃO DE RECUSA PRECIPITADA: Antes de dizer "essa informação não consta", esforce-se para extrair o sentido da pergunta e buscar correlação nos textos recuperados. Informações INSTITUCIONAIS (Missão, Visão, Valores, história, propósito do Agros), diretrizes de manuais, descrições gerais de processos e conceitos DEVEM ser respondidas de forma fluida e analítica usando o contexto disponível, mesmo que a pergunta use palavras diferentes das do documento.
