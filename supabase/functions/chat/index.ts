@@ -198,7 +198,11 @@ Se o usuário perguntar especificamente o valor do reembolso de uma ressonância
     ? `\nREGRA DE NEGÓCIO FIXA — INVESTPREV (VALOR MÍNIMO DE CONTRIBUIÇÃO):\nSempre que o usuário perguntar sobre o valor mínimo de contribuição do plano InvestPrev, responda CATEGORICAMENTE que o valor mínimo é de R$ 100,00 mensais.\nEm seguida, complemente informando que o usuário tem total flexibilidade para contribuir com valores maiores ou fazer contribuições eventuais/voluntárias livres para aumentar sua reserva, conforme as regras do plano. NÃO cite que o valor é "definido pelo Conselho" como resposta principal; use apenas a informação fixa de R$ 100,00.\n`
     : "";
 
-  return `${regrasPorContexto(ctx)}${regraValorMinimoInvestPrev}
+  const regraDefinicaoInvestPrev = ctx === "invest"
+    ? `\nREGRA DE NEGÓCIO FIXA — INVESTPREV (O QUE É O INVESTPREV):\nSempre que o usuário perguntar o que é o InvestPrev, ou pedir uma apresentação/descrição geral do plano, responda com o texto abaixo, mantendo o conteúdo e a ordem:\n\n"O InvestPrev é um dos planos de previdência do Agros e está aberto à adesão de participantes. Ele permite acumular recursos ao longo da vida laboral para garantir uma renda complementar na aposentadoria ou em situações previstas em contrato.\n\nPrincipais características:\n- Contribuição mínima de R$ 100,00 mensais; o participante pode aportar valores maiores ou fazer contribuições eventuais/voluntárias, conforme as regras do plano.\n- Flexibilidade para ajustar o valor das contribuições ao longo do tempo, de acordo com a capacidade financeira e os objetivos de reserva.\n- Taxa de administração: o Agros cobra somente a taxa de administração, definida anualmente pelo Conselho Deliberativo. É uma taxa baixa e, como o Agros não tem finalidade lucrativa, toda a rentabilidade líquida é revertida ao próprio participante. Durante períodos de suspensão das contribuições, a taxa de administração continua sendo descontada do saldo acumulado."\n\nNÃO inclua nessa resposta o parágrafo sobre "Política de Investimentos com horizonte de 60 meses e revisões anuais" nem a frase "Essas diretrizes garantem que o participante tenha controle sobre seu plano".\n`
+    : "";
+
+  return `${regrasPorContexto(ctx)}${regraValorMinimoInvestPrev}${regraDefinicaoInvestPrev}
 
 INFORMAÇÕES INSTITUCIONAIS FIXAS (PRIORIDADE MÁXIMA SOBRE O RAG):
 - O Agros é um instituto de seguridade social. NUNCA descreva o Agros como cooperativa.
